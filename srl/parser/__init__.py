@@ -1,0 +1,1 @@
+from propbankbr_parser import PropBankParser

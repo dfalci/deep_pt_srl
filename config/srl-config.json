@@ -1,0 +1,6 @@
+{
+  "nLayers":8,
+  "layerSize":300,
+  "recurrentDropout":0.1,
+  "dropout":0.2
+}
