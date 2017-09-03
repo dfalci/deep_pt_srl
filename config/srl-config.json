@@ -1,6 +1,11 @@
 {
-  "nLayers":8,
-  "layerSize":300,
+  "embeddingSize":150,
+  "recurrentActivation":"hard_sigmoid",
+  "activation":"tanh",
+  "lstmCells":300,
+  "dropout":0.15,
   "recurrentDropout":0.1,
-  "dropout":0.2
+  "classes":39,
+  "optimizer":"adam",
+  "lossFunction":"categorical_crossentropy"
 }

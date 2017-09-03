@@ -12,10 +12,16 @@ class ContractionHandler(object):
         self.adverb = [u'aí', 'aqui', 'ali']
         self.pronoun = ['ele', 'eles', 'ela', 'elas', 'esse', 'esses', 'essa', 'essas', 'isso', 'este', 'estes', 'esta', 'estas', 'isto']
         self.pronoun_crass = ['aquele', 'aqueles', 'aquela', 'aquelas', 'aquilo']
+        self.ref = ['o', 'os', 'a', 'as', 'me', 'se', 'te', 'vos', 'lhe', 'lho', 'lhas', 'lhos', 'lha', 'lo', 'la', 'los', 'las', 'lhes', 'no', 'na', 'nos']
 
     def mark(self, lowerPattern, upperPattern, currentToken, nextToken, nextTokenAddition, currentRole, tokenList, roleList):
         start = upperPattern if currentToken[0].isupper() else lowerPattern
         tokenList.append(start+nextTokenAddition)
+        roleList.append(currentRole)
+        return True
+
+    def markSimple(self, currentToken, nextToken, currentRole, tokenList, roleList):
+        tokenList.append(currentToken+nextToken)
         roleList.append(currentRole)
         return True
 
@@ -66,6 +72,9 @@ class ContractionHandler(object):
                     contracted = self.mark(u'à', u'À', currentToken, nextToken, '', currentRole, return_tokens, return_roles)
                 elif nextToken.lower() == 'as':
                     contracted = self.mark(u'às', u'Às', currentToken, nextToken, '', currentRole, return_tokens, return_roles)
+            elif currentToken[len(currentToken)-1] == '-':
+                if nextToken.lower() in self.ref:
+                    contracted = self.markSimple(currentToken, nextToken, currentRole, return_tokens, return_roles)
 
             if contracted == False:
                 return_tokens.append(currentToken)
@@ -81,5 +90,13 @@ if __name__ == '__main__':
     tokens = [u'\xab', u'C\xe2mera', u'Manchete', u'\xbb', u'\xe9', u'o', u'nome', u'de', u'o', u'novo', u'programa', u'jornal\xedstico', u'que', u'estr\xe9ia', u'quarta-feira', u',', u'a', u'as', u'22h30', u',', u'em', u'a', u'Rede', u'Manchete', u'.']
 
     teste = ContractionHandler().execute(tokens, tokens)
+
     print teste[0]
     print teste[1]
+
+    tokens = [u'O', u'rei', u'tornou-', u'o', u'cavaleiro']
+    teste = ContractionHandler().execute(tokens, tokens)
+
+    print teste[0]
+    print teste[1]
+

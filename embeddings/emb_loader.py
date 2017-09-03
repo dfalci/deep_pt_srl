@@ -49,7 +49,7 @@ class W2VModel(Embedding):
         self.vecFile = options["vecFile"]
         self.resourcesReady = True
 
-    def __processFile(self):
+    def __processFile(self, addUNK=True, dimensions=150):
         """
         The .vec file is the input and the npz file without the extension
         :param inputFile:
@@ -59,10 +59,24 @@ class W2VModel(Embedding):
         assert self.resourcesReady
         wikiModel = Word2Vec.load(self.vecFile)
         weightMatrix = wikiModel.wv.syn0
-        np.savez(self.npzModel, weightMatrix)
+
         vocab = dict([(k, v.index) for k, v in wikiModel.wv.vocab.items()])
+        print len(vocab)
+        print weightMatrix.shape
+        if addUNK:
+            vocab['UNK_TK'] = len(vocab)
+            weightMatrix = np.vstack((weightMatrix, np.random.rand(1, dimensions)))
+            vocab['UNK_PRED'] = len(vocab)
+            weightMatrix = np.vstack((weightMatrix, np.random.rand(1, dimensions)))
+        print len(vocab)
+        print weightMatrix.shape
+
         with open(self.word2idxFile, 'w') as f:
             f.write(json.dumps(vocab))
+
+
+        np.save(self.npzModel, weightMatrix)
+
         f.close()
 
 
@@ -76,8 +90,8 @@ class W2VModel(Embedding):
         with open(self.word2idxFile, 'r') as f:
             vocab = json.loads(f.read())
         weightMatrix = np.load(self.npzFile)
-        filename = weightMatrix.files[0]
-        weightMatrix = weightMatrix[filename]
+        #filename = weightMatrix.files[0]
+        #weightMatrix = weightMatrix[filename]
         return (vocab, weightMatrix)
 
 
@@ -126,7 +140,7 @@ class EmbeddingLoader(object):
 
 if __name__ == '__main__':
     options = {
-        "npzFile":"../resources/embeddings/wordEmbeddings.npz",
+        "npzFile":"../resources/embeddings/wordEmbeddings.npy",
         "npzModel":"../resources/embeddings/wordEmbeddings",
         "vecFile":"../resources/embeddings/model.vec",
         "w2idxFile":"../resources/embeddings/vocabulary.json"

@@ -1,2 +1,3 @@
 from conll_evaluator import CoNLLEvaluator
 from contraction_handler import ContractionHandler
+from token_regex import parseCSVLine

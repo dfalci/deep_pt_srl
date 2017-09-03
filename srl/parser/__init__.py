@@ -1,1 +1,2 @@
 from propbankbr_parser import PropBankParser
+from nn_corpus_loader import CorpusConverter

@@ -121,6 +121,12 @@ class PropBankParser(object):
             retorno.extend(sent)
         return retorno
 
+    def __findPredicateFromRoles(self, tokens, roles):
+        for (token, role) in zip(tokens, roles):
+            if role == 'V':
+                return token
+        raise AssertionError('Cant find the predicate in the sentence')
+
     def __handleSentence(self, sentenceId, propositionId, sentence, verbNet):
         """
         Transforms a complete sentence read from the propbank into a collection of propositions
@@ -130,9 +136,6 @@ class PropBankParser(object):
         :param verbNet:
         :return:
         """
-
-        if sentenceId == 11:
-            print sentence
         propositions = []
         verbs = self.__extractAllPredicates(sentence)
         for i in range(0, len(verbs)): # for each predicate found
@@ -196,10 +199,12 @@ class PropBankParser(object):
                     tokenTemp.append(subWords[k])
                     roleTemp.append(correctTag)
 
-                #faz a contracao se necessario e preenche a parada
+            #correct the corpus tokens, doing contractions
             tokenTemp, roleTemp = self.contractionHandler.execute(tokenTemp, roleTemp)
+            predTemp = self.__findPredicateFromRoles(tokenTemp, roleTemp) # as it is not possible to trust in predicates from the original corpus, captures the real predicate
+
             for (t, r) in zip(tokenTemp, roleTemp):
-                proposition.append((t, r, currentVerb))
+                proposition.append((t, r, (currentVerb[0], predTemp, currentVerb[1])))
 
             if temSobreposicao:
                 print 'Overflow detected at sentence \'{}\' - Discarding it from the final version '.format(sentenceId)
