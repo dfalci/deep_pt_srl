@@ -101,10 +101,19 @@ class EmbeddingLoader(object):
     def __init__(self, model):
         self.model = model
 
-    def process(self):
+    def process(self, addPadding=True, dimensions=150):
+        """
+        Loads the embedding model. If necessary adds a padding member (array with zeros) at the end
+        :param addPadding:
+        :param dimensions:
+        :return:
+        """
         self.model.prepare()
         self.word2idx = self.model.getVocabulary()
         self.weights = self.model.getWeights()
+        if addPadding:
+            self.weights = np.vstack((self.weights, np.zeros((1, dimensions))))
+
         self.idx2word = self.__createInvertedIndex(self.word2idx)
 
         return self.word2idx, self.idx2word, self.weights
@@ -127,6 +136,6 @@ if __name__ == '__main__':
     loader = EmbeddingLoader(model)
     word2idx, idx2word, weights = loader.process()
     print 'index of word \'eu\': {}'.format(word2idx[u'eu'])
-    print 'Palavra eu a partir do indice da palavra: {}'.format(idx2word[word2idx[u'eu']])
+    print 'word test : {}'.format(idx2word[word2idx[u'eu']])
 
 
