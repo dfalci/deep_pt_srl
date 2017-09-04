@@ -3,5 +3,12 @@ A deep bi-lstm network for semantic role labeling targeted at the Portuguese Lan
 
 
 ### Dependencies
- numpy
  unicodecsv
+ logging
+ numpy
+ pandas
+ tensorflow
+ keras
+ h5py
+
+ 
