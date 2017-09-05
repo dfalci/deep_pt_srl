@@ -125,6 +125,51 @@ class CorpusConverter(object):
             final.append(np.array(linha))
         return np.array(final)
 
+    def __expandPredicates(self, predicates, sentences):
+        """
+        Responsible for expanding predicates when necessary for as many timesteps as necessary
+        :param predicates:
+        :param sentences:
+        :return:
+        """
+        ret = []
+        for i in xrange(0, len(predicates)):
+            line = []
+            for este in xrange(0, len(sentences[i])):
+                line.append(predicates[i])
+            ret.append(line)
+        return np.array(ret)
+
+    def __expandRoles(self, roles):
+        """
+        Expand the role into binarized feature : class 1 from 10 possible classes will be converted to an array such as - [0, 1, 0, 0, 0 ... 0]
+        :param roles:
+        :return:
+        """
+        nClasses = len(self.tagList)
+        ret = []
+        for row in range(0, len(roles)):
+            nrow = []
+            for column in range(0, len(roles[row])):
+                nrow.append(np.eye(nClasses)[roles[row][column]])
+            ret.append(nrow)
+        return np.array(ret)
+
+    def __toTrainFormat(self, sentences, predicates, auxiliar, roles):
+        retSentences = []
+        retPredicates = []
+        retAuxiliar = []
+        retRoles = []
+        for (sent, pred, aux, label) in zip(sentences, predicates, auxiliar, roles):
+            retSentences.append(np.array(sent)[np.newaxis, :])
+            retPredicates.append(np.array(pred)[np.newaxis, :])
+            retAuxiliar.append(np.array(aux)[np.newaxis, :])
+            retRoles.append(np.array(label)[np.newaxis, :])
+
+
+        return retSentences, retPredicates, retAuxiliar, retRoles
+
+
     def printStats(self):
         print self.wordStat
         print self.predStat
@@ -137,7 +182,17 @@ class CorpusConverter(object):
 
 
     def save(self, structure, featureFile):
-        np.save(featureFile, structure)
+        data = {}
+        data["tagMap"] = self.tagMap
+        data["tagList"] = self.tagList
+        data["data"] = structure
+        np.save(featureFile, data)
+
+    def load(self, featureFile):
+        data = np.load(featureFile)
+        self.tagMap = data[()]["tagMap"]
+        self.tagList = data[()]["tagList"]
+        return data[()]["data"]
 
     def convert(self):
         structure = []
@@ -145,10 +200,12 @@ class CorpusConverter(object):
             originalData = self.__loadFile(f)
 
             sentences = np.array(originalData['sentence'].apply(lambda x: self.__prepareTokens(x, self.embeddings.word2idx)))
-            roles = np.array(originalData['roles'].apply(lambda x: self.__prepareRoles(x)))
-            predicates = np.array(originalData['predicate'].apply(lambda x: self.__preparePredicate(x, self.embeddings.word2idx)))
+            roles = self.__expandRoles(np.array(originalData['roles'].apply(lambda x: self.__prepareRoles(x))))
+            predicates = self.__expandPredicates(np.array(originalData['predicate'].apply(lambda x: self.__preparePredicate(x, self.embeddings.word2idx))), sentences)
             aux = self.__auxiliaryToNP(originalData.apply(lambda x: self.__prepareAuxiliaryFeatures(x), axis=1))
             self.__validate(sentences, roles, predicates, aux)
+
+            sentences, roles, predicates, aux = self.__toTrainFormat(sentences, predicates, aux, roles)
             # the order is important
             structure.append((sentences, predicates, aux, roles))
         return structure
@@ -172,6 +229,8 @@ if __name__ == '__main__':
     csvFiles = ['../../resources/corpus/converted/propbank_training.csv', '../../resources/corpus/converted/propbank_test.csv']
     converter = CorpusConverter(csvFiles, loader)
     converter.convertAndSave('../../resources/feature_file')
-    converter.printStats()
+    #converter.load('../../resources/feature_file.npy')
+
+    #converter.printStats()
 
 

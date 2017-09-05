@@ -52,6 +52,7 @@ class LSTMModel(object):
     def __loadConfig(self):
         with open(self.configFile, 'r') as f:
             self.config = json.loads(f.read())
+        f.close()
 
     def create(self, tokenMatrix, predMatrix):
         self.__loadConfig()
@@ -68,12 +69,12 @@ class LSTMModel(object):
 
         nn = None
 
-        inputSentence = Input(shape=(None,), dtype='int32', name='inputSentence')
+        inputSentence = Input(shape=(None,), dtype='int32', name='InputSentence')
         inputAux = Input(shape=(None,), batch_shape=(None, None, 5), name='InputAux')
         inputPredicate = Input(shape=(None,), dtype='int32', name='InputPredicate')
 
         embedding = Embedding(tokenMatrix.shape[0], EMBED_SIZE, weights=[tokenMatrix], trainable=False, name='Embedding')(inputSentence)
-        embeddingPredicate = Embedding(predMatrix.shape[1], EMBED_SIZE,  weights=[predMatrix], trainable=False, name='EmbeddingPred')(inputPredicate)
+        embeddingPredicate = Embedding(predMatrix.shape[0], EMBED_SIZE,  weights=[predMatrix], trainable=False, name='EmbeddingPred')(inputPredicate)
         conc = Concatenate(axis=-1, name='concatenate')([embedding, embeddingPredicate, inputAux])
 
         bi = Bidirectional(LSTM(LSTM_CELLS, activation=ACTIVATION, recurrent_activation=RECURRENT_ACTIVATION, recurrent_dropout=RECURRENT_DROPOUT, dropout=DROPOUT, return_sequences=True))(conc)
@@ -88,7 +89,7 @@ class LSTMModel(object):
 
         nn = Model(inputs=[inputSentence, inputPredicate, inputAux], outputs=[output])
 
-        nn.compile(optimizer=OPTIMIZER, loss='categorical_crossentropy', metrics=['accuracy'])
+        nn.compile(optimizer=OPTIMIZER, loss=LOSS_FUNCTION, metrics=['accuracy'])
         return nn
 
 
