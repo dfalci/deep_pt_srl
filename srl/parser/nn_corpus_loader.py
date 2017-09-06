@@ -205,7 +205,7 @@ class CorpusConverter(object):
             aux = self.__auxiliaryToNP(originalData.apply(lambda x: self.__prepareAuxiliaryFeatures(x), axis=1))
             self.__validate(sentences, roles, predicates, aux)
 
-            sentences, roles, predicates, aux = self.__toTrainFormat(sentences, predicates, aux, roles)
+            sentences, predicates, aux, roles = self.__toTrainFormat(sentences, predicates, aux, roles)
             # the order is important
             structure.append((sentences, predicates, aux, roles))
         return structure

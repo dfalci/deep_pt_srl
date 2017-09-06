@@ -59,11 +59,16 @@ converter = CorpusConverter(csvFiles, loader)
 data = converter.load('../resources/feature_file.npy')
 tagMap = converter.tagMap
 tagList = converter.tagList
+
 trainingData = data[0]
 testData = data[1]
+
 batcher = Batcher()
 batcher.addAll(trainingData[0], trainingData[1], trainingData[2], trainingData[3])
 container = batcher.getBatches()
+
+sent, pred, aux, label = batcher.open(container[0])
+
 
 model = LSTMModel('../config/srl-config.json')
 nn = model.create(weights, weights)
@@ -86,6 +91,7 @@ for epoch in xrange(number_of_epochs):
 
     print "%.2f sec for evaluation" % (time.time() - start_time)
     print ""
+
 
 
 
