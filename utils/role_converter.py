@@ -28,8 +28,18 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from contraction_handler import ContractionHandler
-from token_regex import parseCSVLine
-from singleton import Singleton
-from config import Config
-from role_converter import RoleConverter
+class RoleConverter(object):
+
+    @staticmethod
+    def fromIndexToRoles(sequence, tagList):
+        final = []
+        for item in sequence:
+            final.append(tagList[item])
+        return final
+
+
+if __name__ == '__main__':
+    tagList = ['V', 'A1', 'A2']
+
+    temp = [0, 1, 1, 1, 2]
+    print RoleConverter.fromIndexToRoles(temp, tagList)

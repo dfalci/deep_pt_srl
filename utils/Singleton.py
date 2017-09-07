@@ -28,8 +28,20 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from contraction_handler import ContractionHandler
-from token_regex import parseCSVLine
-from singleton import Singleton
-from config import Config
-from role_converter import RoleConverter
+class Singleton:
+
+    def __init__(self, itemDecorated):
+        self.__itemDecorated = itemDecorated
+
+    def Instance(self):
+        try:
+            return self.__instance
+        except AttributeError:
+            self.__instance = self.__itemDecorated()
+            return self.__instance
+
+    def __call__(self):
+        raise TypeError('singleton access violated')
+
+    def __instancecheck__(self, instance):
+        return isinstance(instance, self.__itemDecorated)

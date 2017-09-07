@@ -36,7 +36,7 @@ class CoNLLEvaluator(object):
     Notice that this script only works in unix based systems.
     """
 
-    def __init__(self, srlEvalScript='../resources/srl-eval.pl'):
+    def __init__(self, srlEvalScript):
         self.golden = []
         self.predicted = []
         self.predicates = []
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     predicates = ['test', 'test2']
 
-    converter = CoNLLEvaluator()
+    converter = CoNLLEvaluator('../resources/srl-eval.pl')
     for i in xrange(0, len(gold)):
         converter.addSentence(gold[i], predicted[i], predicates[i])
 

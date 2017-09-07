@@ -34,8 +34,10 @@ from batcher import Batcher
 from embeddings import EmbeddingLoader
 from embeddings import W2VModel
 from parser import CorpusConverter
+from evaluation import Evaluator
 import time
 import sys
+from utils import Config
 
 
 def showProgress(currentStep, totalSteps):
@@ -44,19 +46,24 @@ def showProgress(currentStep, totalSteps):
     sys.stdout.write('\r[{0}] {1}% - {2}/{3}'.format('#'*int(temp), (perc), currentStep, totalSteps))
     sys.stdout.flush()
 
-options = {
-    "npzFile":"../resources/embeddings/wordEmbeddings.npy",
-    "npzModel":"../resources/embeddings/wordEmbeddings",
-    "vecFile":"../resources/embeddings/model.vec",
-    "w2idxFile":"../resources/embeddings/vocabulary.json"
+config = Config.Instance()
+config.prepare('../config/path.json')
+
+w2vFiles = {
+    "npzFile":config.embeddingsDir+"/wordEmbeddings.npy",
+    "npzModel":config.embeddingsDir+"/wordEmbeddings",
+    "vecFile":config.embeddingsDir+"/model.vec",
+    "w2idxFile":config.embeddingsDir+"/vocabulary.json"
 }
+
 w2v = W2VModel()
-w2v.setResources(options)
+w2v.setResources(w2vFiles)
 loader = EmbeddingLoader(w2v)
 word2idx, idx2word, weights = loader.process()
-csvFiles = ['../resources/corpus/converted/propbank_training.csv', '../resources/corpus/converted/propbank_test.csv']
+csvFiles = [config.convertedCorpusDir+'/propbank_training.csv', config.convertedCorpusDir+'/propbank_test.csv']
+
 converter = CorpusConverter(csvFiles, loader)
-data = converter.load('../resources/feature_file.npy')
+data = converter.load(config.resourceDir+'/feature_file.npy')
 tagMap = converter.tagMap
 tagList = converter.tagList
 
@@ -67,28 +74,33 @@ batcher = Batcher()
 batcher.addAll(trainingData[0], trainingData[1], trainingData[2], trainingData[3])
 container = batcher.getBatches()
 
-sent, pred, aux, label = batcher.open(container[0])
+inference = SRLInference(tagMap, tagList)
+evaluator = Evaluator(testData, inference, tagList, tagMap, config.resultsDir+'/finalResult.json')
 
 
-model = LSTMModel('../config/srl-config.json')
+model = LSTMModel(config.srlConfig+'/srl-config.json')
 nn = model.create(weights, weights)
 nn.summary()
+
 
 number_of_epochs = 2
 for epoch in xrange(number_of_epochs):
     print "--------- Epoch %d -----------" % (epoch+1)
     start_time = time.time()
     numIterations = len(container)
-    print 'Running in {} batches'.format((numIterations,))
+    print 'Running in {} batches'.format(numIterations)
     for i in xrange(0, numIterations):
         sent, pred, aux, label = batcher.open(container[i])
         showProgress(i, numIterations)
         nn.fit([sent, pred, aux], label)
+        if i > 5:
+            break
 
     showProgress(numIterations, numIterations)
     print '\n'
     print 'end of epoch... evaluating'
-
+    evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch), config.resourceDir+'/srl-eval.pl')
+    evaluation = evaluator.evaluate()
     print "%.2f sec for evaluation" % (time.time() - start_time)
     print ""
 

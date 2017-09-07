@@ -28,8 +28,6 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from contraction_handler import ContractionHandler
-from token_regex import parseCSVLine
-from singleton import Singleton
-from config import Config
-from role_converter import RoleConverter
+from training_evaluation import Evaluator
+from token_evaluation import TokenEvaluation
+from conll_evaluator import CoNLLEvaluator

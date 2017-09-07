@@ -33,7 +33,9 @@ import logging
 
 class Node(object):
     def __init__(self, parent, value, position, tagPredicted):
+        # properties that must happend only once but do not need to remove IOB-tags
         self.propCons = set(['V'])
+        # properties that must happen only once and have IOB tags
         self.propIm = set(['A0', 'A1', 'A2', 'A3', 'A4', 'A5'])
         self.parent = parent
         self.value = value

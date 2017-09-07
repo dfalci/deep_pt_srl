@@ -68,7 +68,7 @@ class CorpusConverter(object):
             self.predStat['total'] += 1
 
 
-    def __prepareTokens(self, x, word2idx, defaultWord=u'UNK_TK'):
+    def __prepareTokens(self, x, word2idx, defaultWord=u'UNK_TK', defaultPredicate=u'UNK_PRED'):
         temp = parseCSVLine(x)
         tokens = temp.split(' ')
         retorno = []
@@ -76,7 +76,12 @@ class CorpusConverter(object):
             try:
                 retorno.append(word2idx[t])
             except:
-                retorno.append(word2idx[defaultWord])
+
+                if t in self.predStat['unktokens']:
+                    retorno.append(word2idx[defaultPredicate])
+                else:
+                    retorno.append(word2idx[defaultWord])
+
                 self.wordStat['unknown']+=1
                 self.wordStat['unktokens'].append(t)
 
@@ -199,10 +204,14 @@ class CorpusConverter(object):
         for f in self.csvFiles:
             originalData = self.__loadFile(f)
 
+            predicates = np.array(originalData['predicate'].apply(lambda x: self.__preparePredicate(x, self.embeddings.word2idx)))
+
+            #handle all the final transformations needed
             sentences = np.array(originalData['sentence'].apply(lambda x: self.__prepareTokens(x, self.embeddings.word2idx)))
             roles = self.__expandRoles(np.array(originalData['roles'].apply(lambda x: self.__prepareRoles(x))))
-            predicates = self.__expandPredicates(np.array(originalData['predicate'].apply(lambda x: self.__preparePredicate(x, self.embeddings.word2idx))), sentences)
+            predicates = self.__expandPredicates(predicates, sentences)
             aux = self.__auxiliaryToNP(originalData.apply(lambda x: self.__prepareAuxiliaryFeatures(x), axis=1))
+
             self.__validate(sentences, roles, predicates, aux)
 
             sentences, predicates, aux, roles = self.__toTrainFormat(sentences, predicates, aux, roles)
