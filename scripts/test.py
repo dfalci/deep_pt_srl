@@ -28,18 +28,18 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from model import LSTMModel,ModelEvaluation,LrReducer,ModelPersistence
-from inference import SRLInference
-from batcher import Batcher
+from srl.model import LSTMModel,ModelEvaluation,LrReducer,ModelPersistence
+from srl.inference import SRLInference
+from srl.batcher import Batcher
 from embeddings import EmbeddingLoader
 from embeddings import W2VModel
-from parser import CorpusConverter
-from evaluation import Evaluator
+from srl.parser import CorpusConverter
+from srl.evaluation import Evaluator
 import numpy as np
 import time
 import sys
 from utils import Config
-from model import ModelConfig
+from srl.model import ModelConfig
 from utils import NNUtils
 
 
