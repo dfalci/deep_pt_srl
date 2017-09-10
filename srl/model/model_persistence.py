@@ -29,11 +29,12 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from keras.models import model_from_json
+from utils import Config
 import os
 
 class ModelPersistence(object):
 
-    def __init__(self, nn, modelFile='model.json', weightFile='model.h5'):
+    def __init__(self):
         """
         Saves and loads a neural network model
         :param nn:
@@ -41,40 +42,55 @@ class ModelPersistence(object):
         :param weightFile:
         :return:
         """
-        self.nn = nn
-        self.modelFile = modelFile
-        self.weightFile = weightFile
+        self.state = 0
 
-    def save(self):
-        nn_json = self.nn.to_json()
-        with open(self.modelFile, 'w') as json_file:
+
+    def save(self, nn, modelFile, weightFile):
+        nn_json = nn.to_json()
+        with open(modelFile, 'w') as json_file:
             json_file.write(nn_json)
-        self.nn.save_weights(self.weightFile)
+            json_file.close()
+        nn.save_weights(weightFile)
 
-    def delete(self):
+    def delete(self, modelFile, weightFile):
         try:
-            os.removeFile(self.modelFile)
-            os.removeFile(self.weightFile)
+            os.removeFile(modelFile)
+            os.removeFile(weightFile)
         except:
             pass
 
-    def load(self):
-        json_file = open(self.modelFile, 'r')
+    def load(self, modelFile, weightFile):
+        json_file = open(modelFile, 'r')
         loaded_model_json = json_file.read()
         json_file.close()
-        self.nn = model_from_json(loaded_model_json)
+        nn = model_from_json(loaded_model_json)
 
-        self.nn.load_weights(self.weightFile)
-        return self.nn
+        nn.load_weights(weightFile)
+        self.state = 1
+        return nn
 
 class ModelEvaluation(object):
 
     def __init__(self):
-        self.bestEpoch = 0
+        self.bestEpoch = None
         self.maxF1 = 0
+        self.persistence = ModelPersistence()
+        self.pattern = Config.Instance().resultsDir+'/model_'
 
-    def handle(self, evaluation, epoch):
-        if evaluation["macroF1"] > self.maxF1:
-            print 'NEW BEST VALUE IN EPOCH '+str(epoch)
-            print evaluation['macroF1']
-            self.maxF1 = evaluation['macroF1']
+
+    def __getNames(self, epoch):
+        return (self.pattern+str(epoch)+'.json',self.pattern+str(epoch)+'.h5py')
+
+
+    def update(self, nn, f1, epoch):
+        if f1 > self.maxF1:
+            print 'NEW BEST VALUE IN EPOCH {} : {} \nSaving checkpoint...'.format(epoch, f1)
+            if self.bestEpoch!=None:
+                modelFile, wFile = self.__getNames(self.bestEpoch)
+                self.persistence.delete(modelFile, wFile)
+
+            modelFile, wFile = self.__getNames(epoch)
+            self.persistence.save(nn, modelFile, wFile)
+            print 'checkpoint saved'
+            self.bestEpoch = epoch
+            self.maxF1 = f1

@@ -28,18 +28,18 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-class RoleConverter(object):
+from utils import Singleton
+import json
 
-    @staticmethod
-    def fromIndexToRoles(sequence, tagList):
-        final = []
-        for item in sequence:
-            final.append(tagList[item])
-        return final
+@Singleton
+class ModelConfig(object):
 
+    def __init__(self):
+        self.config = None
 
-if __name__ == '__main__':
-    tagList = ['V', 'A1', 'A2']
-
-    temp = [0, 1, 1, 1, 2]
-    print RoleConverter.fromIndexToRoles(temp, tagList)
+    def prepare(self, configFile):
+        with open(configFile, 'r') as f:
+            self.config = json.loads(f.read())
+        f.close()
+        for k, v in enumerate(self.config):
+            self.__dict__[v] = self.config[v]

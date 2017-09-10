@@ -30,19 +30,22 @@
 
 import numpy as np
 import logging
+import bisect
 
 class Node(object):
-    def __init__(self, parent, value, position, tagPredicted):
+    def __init__(self, parent, value, heuristic, position, tagPredicted):
         # properties that must happend only once but do not need to remove IOB-tags
         self.propCons = set(['V'])
         # properties that must happen only once and have IOB tags
         self.propIm = set(['A0', 'A1', 'A2', 'A3', 'A4', 'A5'])
         self.parent = parent
         self.value = value
+        self.heuristic = heuristic
         self.tagPredicted = tagPredicted
         self.position = position
         self.f = 0
-        self.cumulativeCost = 0 if self.parent==None else self.parent.f
+        self.g = 0
+        self.cumulativeCost = 0 if self.parent==None else self.parent.g
         self.openingCost = 0
         self.iob = 0
         self.prop = 0
@@ -63,6 +66,9 @@ class Node(object):
         :return:
         """
         return 'Tag index {0} - {1} \nvalue : {2}\ncost : {3} : {4} - {5}\ntotal : {6}\n'.format(self.position, self.tagPredicted, self.value, self.openingCost, self.iob, self.prop, self.f)
+
+    def __lt__(self, other):
+        return self.f < other.f
 
     def setChildren(self, children):
         self.children = children
@@ -124,9 +130,12 @@ class Node(object):
     def calculate(self):
         self.iob = self.__calculateBIO()
         self.prop = self.__calculatePropBank()
+
         self.cost =  self.iob + self.prop
-        self.openingCost = self.value - self.cost;
-        self.f = self.cumulativeCost + self.openingCost;
+        self.openingCost = (self.value - self.cost) + self.heuristic;
+
+        self.g = self.cumulativeCost + self.openingCost;
+        self.f = self.g + self.heuristic
 
 class SRLInference(object):
 
@@ -146,7 +155,7 @@ class SRLInference(object):
         if (currentIndex < len(self.predictionMatrix)):
             bestIndex, bestValues = self.__getNBestIndex(self.predictionMatrix[currentIndex], nBest)
             for i in xrange(0, len(bestIndex)):
-                children.append(Node(parent, bestValues[i], (currentIndex, bestIndex[i]), self.tagList[bestIndex[i]]))
+                children.append(Node(parent, bestValues[i], self.__calculateHeuristic(parent.position[0]+1), (currentIndex, bestIndex[i]), self.tagList[bestIndex[i]]))
         return children
 
     def predict(self, predictionMatrix):
@@ -156,6 +165,7 @@ class SRLInference(object):
         :param nBestSolutions:
         :return:
         """
+        self.__calculateHeuristicCache(predictionMatrix)
         solucao = self.search(predictionMatrix, 1)[0]
         predicao = solucao
         resultado = np.zeros(predictionMatrix.shape)
@@ -180,20 +190,14 @@ class SRLInference(object):
         :return:
         """
         self.predictionMatrix = predictionMatrix
-        openset = set(self.createFirstNodes(1000))
-
-        def getCost(elem):
-            return elem.f
-
-        def getValue(elem):
-            return elem.openingCost
-
+        openset = sorted(self.createFirstNodes(1000))
         closedset = set()
+
         solutions = []
         iterations = 0
         while len(openset) != 0:
             iterations+=1
-            currentNode = sorted(openset, key=getValue, reverse=True)[0]
+            currentNode = openset.pop()
             if debug:
                 logging.debug('opening : {0} - cumulative = {1}, openinig = {2}'.format(currentNode.position, currentNode.f, currentNode.openingCost))
             if currentNode.position[0] == self.predictionMatrix.shape[0] -1:
@@ -201,21 +205,19 @@ class SRLInference(object):
                 if len(solutions) == nBestSolutions:
                     break
 
-            openset.remove(currentNode)
-            #logging.debug('removing : {0} - Length : {1}'.format(currentNode.position, len(openset)))
+            logging.debug('removing : {0} - Length : {1}'.format(currentNode.position, len(openset)))
             closedset.add(currentNode)
             children = self.__generateChildren(currentNode)
 
             for child in children:
+                if child.cost == 0:
+                    bisect.insort_left(openset, child)
 
-                if currentNode.position == (1, 1):
-                    logging.debug(child.__str__())
-                #if child.cost == 0:
-                openset.add(child)
         if debug:
             logging.debug('ended in '+str(iterations)+' iterations')
             for x in solutions:
                 self.__printPath(x)
+        self.iterations = iterations
         return solutions
 
 
@@ -236,8 +238,22 @@ class SRLInference(object):
         bestIndex, predictions = self.__getNBestIndex(self.predictionMatrix[0], num, False)
         firstNodes = []
         for i in xrange(0, len(bestIndex)):
-            firstNodes.append(Node(None, predictions[i], (0, bestIndex[i]), self.tagList[bestIndex[i]]))
+            firstNodes.append(Node(None, predictions[i], self.__calculateHeuristic(0) ,(0, bestIndex[i]), self.tagList[bestIndex[i]]))
         return firstNodes
+
+    def __calculateHeuristic(self, currentStep):
+        summation = 0
+        for i in xrange(currentStep+1, len(self.heuristicNodes)):
+            summation += self.heuristicNodes[i]
+        return summation
+
+    def __calculateHeuristicCache(self, predictionMatrix):
+        self.heuristicNodes = []
+        cumulative = 0
+        for i in xrange(0, len(predictionMatrix)):
+            indexes, values = self.__getNBestIndex(predictionMatrix[i], 1)
+            self.heuristicNodes.append(values[0])
+
 
 
     def __getNBestIndex(self, arr, n, show=False):
@@ -257,8 +273,8 @@ class SRLInference(object):
 
 if __name__ == '__main__':
     sentenca = ['o', 'rato', 'roeu', 'a', 'roupa', 'do', 'rei']
-    tagList = ['B-ARG0', 'I-ARG0', 'V', 'B-ARG1', 'I-ARG1', 'O', 'B-ARG2']
-    tagMap = {'B-ARG0':0, 'I-ARG0':1, 'V':2, 'B-ARG1':3, 'I-ARG1':4, 'O':5, 'B-ARG2':6}
+    tagList = ['B-A0', 'I-A0', 'V', 'B-A1', 'I-A1', 'O', 'B-A2']
+    tagMap = {'B-A0':0, 'I-A0':1, 'V':2, 'B-A1':3, 'I-A1':4, 'O':5, 'B-A2':6}
     predictionMatrix = np.array([
     #    ba0  ia0     v    ba1    ia1    o     ba2
         [0.34, 0.25, 0.01, 0.11, 0.30, 0.33, 0.12], # o - ba0
@@ -280,6 +296,7 @@ if __name__ == '__main__':
     #logging.basicConfig(filename='output.log',level=logging.DEBUG)
     inference = SRLInference(tagMap, tagList)
     print inference.predict(predictionMatrix)
+    print inference.iterations
 
 
 

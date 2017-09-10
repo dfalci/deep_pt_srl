@@ -1,5 +1,4 @@
 {
-  "baseDir":"/Users/danielfalci/Dropbox/Experimentos/dissertacao/deep_pt_srl",
   "srlConfig":"${baseDir}/config",
   "resourceDir":"${baseDir}/resources",
   "corpusDir":"${resourceDir}/corpus",

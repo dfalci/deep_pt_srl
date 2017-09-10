@@ -36,10 +36,11 @@ class CoNLLEvaluator(object):
     Notice that this script only works in unix based systems.
     """
 
-    def __init__(self, srlEvalScript):
+    def __init__(self, srlEvalScript, idx2word):
         self.golden = []
         self.predicted = []
         self.predicates = []
+        self.idx2word = idx2word
         self.srlEvalScript = srlEvalScript;
 
 
@@ -115,10 +116,12 @@ if __name__ == '__main__':
         ['B-A0', 'I-A0', 'O', 'O', 'V', 'B-A1', 'I-A1', 'I-A1', 'O']
     ]
 
-    predicates = ['test', 'test2']
+    predicates = [0, 2]
 
-    converter = CoNLLEvaluator('../resources/srl-eval.pl')
+    idx2word= {0:'daniel', 1:'e', 2:'muito', 3:'inteligente', 4:'e', 5:'legal', 6:'.'}
+
+    converter = CoNLLEvaluator('../../resources/srl-eval.pl', idx2word)
     for i in xrange(0, len(gold)):
         converter.addSentence(gold[i], predicted[i], predicates[i])
 
-    converter.write()
+    converter.write(outputFile='../../results/official.eval', goldfile='../../results/gold.props', predictedfile='../../results/pred.props')

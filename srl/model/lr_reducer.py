@@ -28,42 +28,33 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from singleton import Singleton
-import json
+class LrReducer(object):
 
-@Singleton
-class Config(object):
-
-    def __init__(self):
-        self.config = None
-
-    def __getNestedReference(self, key):
-        idx = self.config[key].find('${')
-        if idx!=-1:
-            idxE = self.config[key].find('}', idx)
-            return self.config[key][idx+2:idxE]
-        return None
+    def __init__(self, patience=2, reduceRate=0.5, maxReductions=20):
+        self.patience =0
+        self.roundsAwaiting = 0
+        self.bestF1 = 0
+        self.reduceRate =0
+        self.maxReductions = maxReductions
+        self.reductions = 0
 
 
-    def prepare(self, baseDir):
-        self.baseDir = baseDir
-        configFile = self.baseDir+'/config/path.json'
-        with open(configFile, 'r') as f:
-            self.config = json.loads(f.read())
-        f.close()
-        for k, v in enumerate(self.config):
-            self.__dict__[v] = self.config[v]
-        self.__fill()
-
-    def __fill(self):
-        for k, v in enumerate(self.config):
-            temp = self.__getNestedReference(v)
-            if temp!=None:
-                self.__dict__[v] = self.__dict__[v].replace('${'+temp+'}', self.__dict__[temp])
+    def onEpochEnd(self, nn, f1Score):
+        if f1Score > self.bestF1:
+            self.bestF1 = f1Score
+            self.roundsAwaiting = 0
+            print 'current best f1 : {}'.format(self.bestF1)
+        else:
+            if self.roundsAwaiting >= self.patience:
+                if (self.reductions > self.maxReductions):
+                    lr = nn.optimizer.lr_get_value()
+                    print 'current learning rate : {}'.format(lr)
+                    nn.optimizer.lr.set_value(lr * self.reduceRate)
+                self.reductions+=1
+            else:
+                self.roundsAwaiting+=1
+                print 'incremented rounds awaiting {}'.format(self.roundsAwaiting)
 
 
 
-if __name__ == '__main__':
-    config = Config.Instance()
-    config.prepare('../config/path.json')
-    print Config.Instance().resourceDir
+

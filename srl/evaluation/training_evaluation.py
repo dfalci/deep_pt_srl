@@ -30,7 +30,7 @@
 
 from token_evaluation import TokenEvaluation
 from conll_evaluator import CoNLLEvaluator
-from utils import RoleConverter
+from utils import ConverterUtils
 import numpy as np
 import os
 import json
@@ -38,7 +38,7 @@ import json
 
 class Evaluator(object):
 
-    def __init__(self, testData, globalInference, tagList, tagMap, generalResultFile):
+    def __init__(self, testData, globalInference, nnUtils, generalResultFile):
         """
         Makes the comparison process
         :param testData:
@@ -47,8 +47,9 @@ class Evaluator(object):
         """
         self.testData = testData
         self.globalInference = globalInference
-        self.tagList = tagList
-        self.tagMap = tagMap
+        self.nnUtils = nnUtils
+        self.tagList = nnUtils.tagList
+        self.tagMap = nnUtils.tagMap
         self.generalResultFile = generalResultFile
         self.nn = None
         self.evaluations = []
@@ -64,42 +65,27 @@ class Evaluator(object):
     def prepare(self, nn, targetDirectory, conllFile):
         self.nn = nn
         self.tokenEvaluation = TokenEvaluation(self.tagMap, self.tagList)
-        self.officialEvaluation = CoNLLEvaluator(conllFile)
+        self.officialEvaluation = CoNLLEvaluator(conllFile, self.nnUtils.idx2word)
         self.targetDirectory = targetDirectory
         self.__createDirectoryIfNeeded(self.targetDirectory)
 
 
     def evaluate(self):
-        teste = 0
         for sent, pred, aux, role in zip(self.testData[0], self.testData[1], self.testData[2], self.testData[3]):
-            print 'fazendo predicao'
             y = self.nn.predict([sent, pred, aux])
-            print 'predicao encerrada'
-            print 'fzendo inferencia'
             y, tags = self.globalInference.predict(y[0])
-            print 'inferencia encerrada'
 
-            #create an index array for predictions and golden labels
-            print 'ajustando dados'
             y = np.argmax(y, axis=1)
             golden = np.argmax(role[0], axis=1)
-            print 'dados ajustados'
 
-            print 'adicionando sample'
             self.tokenEvaluation.addSample(golden, y)
-            self.officialEvaluation.addSentence(RoleConverter.fromIndexToRoles(golden, self.tagList), RoleConverter.fromIndexToRoles(y, self.tagList), pred[0][0])
-            print 'registrando sample'
-            teste +=1
-            if teste > 3:
-                break
+            self.officialEvaluation.addSentence(ConverterUtils.fromIndexToRoles(golden, self.tagList), ConverterUtils.fromIndexToRoles(y, self.tagList), pred[0][0])
 
-        print 'calculando'
         evaluation = self.tokenEvaluation.calculate()
         self.evaluations.append(evaluation)
-        print 'calculado'
-        print 'escrevendo resultados'
+
         self.__writeResults()
-        print 'terminou'
+
         return evaluation
 
     def __writeResults(self):

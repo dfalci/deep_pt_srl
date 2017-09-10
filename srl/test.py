@@ -28,7 +28,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from model import LSTMModel,ModelEvaluation,LrReducer
+from model import LSTMModel,ModelEvaluation,LrReducer,ModelPersistence
 from inference import SRLInference
 from batcher import Batcher
 from embeddings import EmbeddingLoader
@@ -40,7 +40,7 @@ import time
 import sys
 from utils import Config
 from model import ModelConfig
-from utils import NNUtils, Utils
+from utils import NNUtils
 
 
 def showProgress(currentStep, totalSteps):
@@ -49,11 +49,11 @@ def showProgress(currentStep, totalSteps):
     sys.stdout.write('\r[{0}] {1}% - {2}/{3}'.format('#'*int(temp), (perc), currentStep, totalSteps))
     sys.stdout.flush()
 
-np.random.seed(13)
+np.random.seed(3)
 
 print 'loading configuration'
 config = Config.Instance()
-config.prepare(Utils.getWorkingDirectory())
+config.prepare('../config/path.json')
 
 ModelConfig.Instance().prepare('../config/srl-config.json')
 
@@ -107,8 +107,10 @@ msaver = ModelEvaluation()
 print 'model prepared'
 
 print 'creating neural network model'
-model = LSTMModel(ModelConfig.Instance())
-nn = model.create(weights, weights)
+
+#model = LSTMModel(ModelConfig.Instance())
+mp = ModelPersistence()
+nn = mp.load(Config.Instance().resourceDir+'/model_1.json', Config.Instance().resourceDir+'/model_1.h5py', )
 nn.summary()
 
 print 'model loaded'
@@ -116,7 +118,7 @@ print 'model loaded'
 
 print 'start training'
 
-number_of_epochs = 10
+number_of_epochs = 2
 for epoch in xrange(number_of_epochs):
     print "--------- Epoch %d -----------" % (epoch+1)
     start_time = time.time()
@@ -126,6 +128,8 @@ for epoch in xrange(number_of_epochs):
         sent, pred, aux, label = batcher.open(container[i])
         showProgress(i, numIterations)
         nn.fit([sent, pred, aux], label)
+        if i > 10:
+            break
 
     showProgress(numIterations, numIterations)
     print '\n'

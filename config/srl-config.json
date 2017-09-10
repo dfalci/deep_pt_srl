@@ -7,5 +7,9 @@
   "recurrentDropout":0.1,
   "classes":39,
   "optimizer":"adam",
-  "lossFunction":"categorical_crossentropy"
+  "lossFunction":"categorical_crossentropy",
+  "learningRate":0.001,
+  "patience":2,
+  "decayRate":0.5,
+  "maxReductions":10
 }

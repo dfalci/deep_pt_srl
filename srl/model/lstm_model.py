@@ -28,8 +28,6 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import json
-import numpy as np
 from keras.models import Model
 from keras.layers import Dense, Dropout, LSTM, Embedding
 from keras.layers.wrappers import TimeDistributed, Bidirectional
@@ -40,32 +38,15 @@ from keras.engine import Input
 
 class LSTMModel(object):
 
-    def __init__(self, configFile):
+    def __init__(self, config):
         """
         Creates a neural network model
         :param configFile:
         :return:
         """
-        self.configFile = configFile
-        self.config = None
-
-    def __loadConfig(self):
-        with open(self.configFile, 'r') as f:
-            self.config = json.loads(f.read())
-        f.close()
+        self.config = config
 
     def create(self, tokenMatrix, predMatrix):
-        self.__loadConfig()
-
-        EMBED_SIZE = self.config['embeddingSize']
-        LSTM_CELLS = self.config['lstmCells']
-        RECURRENT_ACTIVATION = self.config["recurrentActivation"]
-        ACTIVATION = self.config["activation"]
-        DROPOUT = self.config["dropout"]
-        RECURRENT_DROPOUT = self.config["recurrentDropout"]
-        CLASSES = self.config["classes"]
-        OPTIMIZER = self.config["optimizer"]
-        LOSS_FUNCTION = self.config["lossFunction"]
 
         nn = None
 
@@ -73,25 +54,23 @@ class LSTMModel(object):
         inputAux = Input(shape=(None,), batch_shape=(None, None, 5), name='InputAux')
         inputPredicate = Input(shape=(None,), dtype='int32', name='InputPredicate')
 
-        embedding = Embedding(tokenMatrix.shape[0], EMBED_SIZE, weights=[tokenMatrix], trainable=False, name='Embedding')(inputSentence)
-        embeddingPredicate = Embedding(predMatrix.shape[0], EMBED_SIZE,  weights=[predMatrix], trainable=False, name='EmbeddingPred')(inputPredicate)
+        embedding = Embedding(tokenMatrix.shape[0], self.config.embeddingSize, weights=[tokenMatrix], trainable=False, name='Embedding')(inputSentence)
+        embeddingPredicate = Embedding(predMatrix.shape[0], self.config.embeddingSize,  weights=[predMatrix], trainable=False, name='EmbeddingPred')(inputPredicate)
         conc = Concatenate(axis=-1, name='concatenate')([embedding, embeddingPredicate, inputAux])
 
-        bi = Bidirectional(LSTM(LSTM_CELLS, activation=ACTIVATION, recurrent_activation=RECURRENT_ACTIVATION, recurrent_dropout=RECURRENT_DROPOUT, dropout=DROPOUT, return_sequences=True))(conc)
+        bi = Bidirectional(LSTM(self.config.lstmCells, activation=self.config.activation, recurrent_activation=self.config.recurrentActivation, recurrent_dropout=self.config.recurrentDropout, dropout=self.config.dropout, return_sequences=True))(conc)
 
-        bi = Bidirectional(LSTM(LSTM_CELLS, activation=ACTIVATION, recurrent_activation=RECURRENT_ACTIVATION, recurrent_dropout=RECURRENT_DROPOUT, dropout=DROPOUT, return_sequences=True))(bi)
+        bi = Bidirectional(LSTM(self.config.lstmCells, activation=self.config.activation, recurrent_activation=self.config.recurrentActivation, recurrent_dropout=self.config.recurrentDropout, dropout=self.config.dropout, return_sequences=True))(bi)
 
-        bi = Bidirectional(LSTM(LSTM_CELLS, activation=ACTIVATION, recurrent_activation=RECURRENT_ACTIVATION, recurrent_dropout=RECURRENT_DROPOUT, dropout=DROPOUT, return_sequences=True))(bi)
+        bi = Bidirectional(LSTM(self.config.lstmCells, activation=self.config.activation, recurrent_activation=self.config.recurrentActivation, recurrent_dropout=self.config.recurrentDropout, dropout=self.config.dropout, return_sequences=True))(bi)
 
-        bi = Bidirectional(LSTM(LSTM_CELLS, activation=ACTIVATION, recurrent_activation=RECURRENT_ACTIVATION, recurrent_dropout=RECURRENT_DROPOUT, dropout=DROPOUT, return_sequences=True))(bi)
+        bi = Bidirectional(LSTM(self.config.lstmCells, activation=self.config.activation, recurrent_activation=self.config.recurrentActivation, recurrent_dropout=self.config.recurrentDropout, dropout=self.config.dropout, return_sequences=True))(bi)
 
-        output = TimeDistributed(Dense(units=CLASSES, activation='softmax'), name='output')(bi)
+        output = TimeDistributed(Dense(units=self.config.classes, activation='softmax'), name='output')(bi)
 
         nn = Model(inputs=[inputSentence, inputPredicate, inputAux], outputs=[output])
 
-        nn.compile(optimizer=OPTIMIZER, loss=LOSS_FUNCTION, metrics=['accuracy'])
+        nn.compile(optimizer=self.config.optimizer, loss=self.config.lossFunction, metrics=['accuracy'])
         return nn
 
 
-if __name__ == '__main__':
-    pass
