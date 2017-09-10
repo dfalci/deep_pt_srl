@@ -28,9 +28,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from keras.models import model_from_json
-from utils.config import Config
 import os
+
+from keras.models import model_from_json
+
+from config import Config
+
 
 class ModelPersistence(object):
 

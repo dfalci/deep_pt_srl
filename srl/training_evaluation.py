@@ -28,12 +28,14 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from token_evaluation import TokenEvaluation
-from conll_evaluator import CoNLLEvaluator
-from utils.converter_utils import ConverterUtils
-import numpy as np
-import os
 import json
+import os
+
+import numpy as np
+
+from conll_evaluator import CoNLLEvaluator
+from converter_utils import ConverterUtils
+from token_evaluation import TokenEvaluation
 
 
 class Evaluator(object):

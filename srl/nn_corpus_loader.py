@@ -28,10 +28,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import pandas as pd
 import numpy as np
-from utils.token_regex import parseCSVLine
-from embeddings import W2VModel, EmbeddingLoader
+import pandas as pd
+
+from emb_loader import W2VModel, EmbeddingLoader
+from token_regex import parseCSVLine
+
 
 class CorpusConverter(object):
 

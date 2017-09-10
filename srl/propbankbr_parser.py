@@ -30,11 +30,14 @@
 
 
 import codecs
-import random
 import math
-import unicodecsv as csv
+import random
 from os.path import join
-from utils.contraction_handler import ContractionHandler
+
+import unicodecsv as csv
+
+from contraction_handler import ContractionHandler
+
 
 class PropBankParser(object):
 

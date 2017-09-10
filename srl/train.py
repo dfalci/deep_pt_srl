@@ -28,19 +28,21 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from srl import LSTMModel,ModelEvaluation,LrReducer
-from srl import SRLInference
-from srl import Batcher
-from embeddings import EmbeddingLoader
-from embeddings import W2VModel
-from srl import CorpusConverter
-from srl import Evaluator
+from lstm_model import LSTMModel
+from model_persistence import ModelEvaluation, ModelPersistence
+from lr_reducer import LrReducer
+from inference import SRLInference
+from batcher import Batcher
+from emb_loader import EmbeddingLoader, W2VModel
+from nn_corpus_loader import CorpusConverter
+from training_evaluation import Evaluator
 import numpy as np
 import time
 import sys
-from utils import Config
-from utils import ModelConfig
-from utils import NNUtils, Utils
+from config import Config
+from model_config import ModelConfig
+from nn_utils import NNUtils
+from function_utils import Utils
 
 
 def showProgress(currentStep, totalSteps):
