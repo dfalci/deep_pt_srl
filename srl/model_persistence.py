@@ -29,7 +29,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from keras.models import model_from_json
-from utils import Config
+from utils.config import Config
 import os
 
 class ModelPersistence(object):

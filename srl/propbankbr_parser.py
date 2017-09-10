@@ -34,7 +34,7 @@ import random
 import math
 import unicodecsv as csv
 from os.path import join
-from utils import ContractionHandler
+from utils.contraction_handler import ContractionHandler
 
 class PropBankParser(object):
 

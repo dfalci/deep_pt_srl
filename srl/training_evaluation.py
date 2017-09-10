@@ -30,7 +30,7 @@
 
 from token_evaluation import TokenEvaluation
 from conll_evaluator import CoNLLEvaluator
-from utils import ConverterUtils
+from utils.converter_utils import ConverterUtils
 import numpy as np
 import os
 import json
