@@ -34,4 +34,5 @@ from singleton import Singleton
 from config import Config
 from converter_utils import ConverterUtils
 from nn_utils import NNUtils
-from utils import Utils
+from function_utils import Utils
+from model_config import ModelConfig

@@ -38,9 +38,9 @@ from srl.evaluation import Evaluator
 import numpy as np
 import time
 import sys
-from utils import Config
+from function_utils import Config
 from srl.model import ModelConfig
-from utils import NNUtils
+from function_utils import NNUtils
 
 
 def showProgress(currentStep, totalSteps):
