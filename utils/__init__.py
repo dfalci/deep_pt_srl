@@ -30,9 +30,9 @@
 
 from contraction_handler import ContractionHandler
 from token_regex import parseCSVLine
-from singleton import Singleton
 from config import Config
 from converter_utils import ConverterUtils
 from nn_utils import NNUtils
 from function_utils import Utils
 from model_config import ModelConfig
+from singleton import Singleton
