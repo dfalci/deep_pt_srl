@@ -60,6 +60,7 @@ class ModelPersistence(object):
             os.removeFile(modelFile)
             os.removeFile(weightFile)
         except:
+            print 'error removing file'
             pass
 
     def load(self, modelFile, weightFile):

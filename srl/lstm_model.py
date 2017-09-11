@@ -38,13 +38,13 @@ from keras.engine import Input
 
 class LSTMModel(object):
 
-    def __init__(self, config):
+    def __init__(self, modelConfig):
         """
         Creates a neural network model
         :param configFile:
         :return:
         """
-        self.config = config
+        self.config = modelConfig
 
     def create(self, tokenMatrix, predMatrix):
 
@@ -54,8 +54,9 @@ class LSTMModel(object):
         inputAux = Input(shape=(None,), batch_shape=(None, None, 5), name='InputAux')
         inputPredicate = Input(shape=(None,), dtype='int32', name='InputPredicate')
 
-        embedding = Embedding(tokenMatrix.shape[0], self.config.embeddingSize, weights=[tokenMatrix], trainable=False, name='Embedding')(inputSentence)
-        embeddingPredicate = Embedding(predMatrix.shape[0], self.config.embeddingSize,  weights=[predMatrix], trainable=False, name='EmbeddingPred')(inputPredicate)
+        embedding = Embedding(tokenMatrix.shape[0], self.config.embeddingSize, weights=[tokenMatrix], trainable=self.config.trainableEmbeddings, name='Embedding')(inputSentence)
+        embeddingPredicate = Embedding(predMatrix.shape[0], self.config.embeddingSize,  weights=[predMatrix], trainable=self.config.trainableEmbeddings, name='EmbeddingPred')(inputPredicate)
+
         conc = Concatenate(axis=-1, name='concatenate')([embedding, embeddingPredicate, inputAux])
 
         bi = Bidirectional(LSTM(self.config.lstmCells, activation=self.config.activation, recurrent_activation=self.config.recurrentActivation, recurrent_dropout=self.config.recurrentDropout, dropout=self.config.dropout, return_sequences=True))(conc)

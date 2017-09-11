@@ -29,37 +29,43 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from keras import backend as K
+from emb_loader import EmbeddingLoader, W2VModel
+from nn_corpus_loader import CorpusConverter
+from propbankbr_parser import PropBankParser
 
-class LrReducer(object):
+import numpy as np
 
-    def __init__(self, patience=4, reduceRate=0.75, maxReductions=20):
-        self.patience =patience
-        self.roundsAwaiting = 0
-        self.bestF1 = 0
-        self.reduceRate = reduceRate
-        self.maxReductions = maxReductions
-        self.reductions = 0
-
-
-    def onEpochEnd(self, nn, f1Score):
-        if f1Score > self.bestF1:
-            self.bestF1 = f1Score
-            self.roundsAwaiting = 0
-            print 'current best f1 : {}'.format(self.bestF1)
-        else:
-            if self.roundsAwaiting >= self.patience:
-                if (self.reductions <= self.maxReductions):
-                    lr = K.get_value(nn.optimizer.lr)
-                    new_lr = lr * self.reduceRate
-                    K.set_value(nn.optimizer.lr, new_lr)
-                    print 'current learning rate : {} - new_lr : {}'.format(lr, new_lr)
-                    self.roundsAwaiting = 0
-                    self.reductions+=1
-            else:
-                self.roundsAwaiting+=1
-                print 'incremented rounds awaiting {}'.format(self.roundsAwaiting)
+from config import Config
+from model_config import ModelConfig
+from function_utils import Utils
+from prepare_hybrid_embeddings import prepareEmbeddings
 
 
+np.random.seed(4)
 
 
+print 'loading configuration'
+config = Config.Instance()
+config.prepare(Utils.getWorkingDirectory())
+print 'base directory : {}'.format(config.baseDir)
+ModelConfig.Instance().prepare(config.srlConfig+'/srl-config.json')
+print 'configuration loaded'
+
+
+print 'converting from propbank format : partition 0.95, 0.05. no development set'
+parser = PropBankParser(config.corpusDir+'/PropBankBr_v1.1_Const.conll.txt', config.corpusDir+'/verbnet_gold.csv')
+parser.prepare()
+parser.generateFeatures(outputDirectory=config.convertedCorpusDir, partition=(0.95, 0, 0.05))
+print 'conversion ready'
+
+print 'loading embedding model'
+sentLoader, predLoader = prepareEmbeddings(config, 'hybrid')
+print 'embeddings loaded'
+
+
+print 'creating features'
+csvFiles = [config.convertedCorpusDir+'/propbank_training.csv', config.convertedCorpusDir+'/propbank_test.csv']
+converter = CorpusConverter(csvFiles, sentLoader, predLoader)
+converter.convertAndSave(config.resourceDir+'/feature_file')
+data = converter.load(config.resourceDir+'/feature_file.npy')
+print 'features created'

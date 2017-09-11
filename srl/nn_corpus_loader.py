@@ -31,13 +31,13 @@
 import numpy as np
 import pandas as pd
 
-from emb_loader import W2VModel, EmbeddingLoader
+from emb_loader import EmbeddingLoader
 from token_regex import parseCSVLine
 
 
 class CorpusConverter(object):
 
-    def __init__(self, csvFiles, embeddingLoader):
+    def __init__(self, csvFiles, sentenceEmbeddingLoader, predicateEmbeddingLoader=None):
         """
         This class is responsible for transforming the data from the csv file to the format expected by our lstm model
         :param csvFile: the csv file to be transformed
@@ -46,7 +46,12 @@ class CorpusConverter(object):
         """
         self.csvFiles = csvFiles
 
-        self.embeddings = embeddingLoader
+        self.sentenceEmbeddingLoader = sentenceEmbeddingLoader
+        if predicateEmbeddingLoader == None:
+            self.predicateEmbeddingLoader = sentenceEmbeddingLoader
+        else:
+            self.predicateEmbeddingLoader = predicateEmbeddingLoader
+
         self.wordStat = {'biggestSize':0, 'unknown':0, 'unktokens':[], 'total':0}
         self.predStat = {'unknown':0, 'unktokens':[], 'total':0}
         self.tagCount = {}
@@ -206,10 +211,10 @@ class CorpusConverter(object):
         for f in self.csvFiles:
             originalData = self.__loadFile(f)
 
-            predicates = np.array(originalData['predicate'].apply(lambda x: self.__preparePredicate(x, self.embeddings.word2idx)))
+            predicates = np.array(originalData['predicate'].apply(lambda x: self.__preparePredicate(x, self.predicateEmbeddingLoader.word2idx)))
 
             #handle all the final transformations needed
-            sentences = np.array(originalData['sentence'].apply(lambda x: self.__prepareTokens(x, self.embeddings.word2idx)))
+            sentences = np.array(originalData['sentence'].apply(lambda x: self.__prepareTokens(x, self.sentenceEmbeddingLoader.word2idx)))
             roles = self.__expandRoles(np.array(originalData['roles'].apply(lambda x: self.__prepareRoles(x))))
             predicates = self.__expandPredicates(predicates, sentences)
             aux = self.__auxiliaryToNP(originalData.apply(lambda x: self.__prepareAuxiliaryFeatures(x), axis=1))
@@ -226,7 +231,11 @@ class CorpusConverter(object):
 
 
 
+
 if __name__ == '__main__':
+
+    from emb_loader import W2VModel
+
     options = {
         "npzFile":"../../resources/embeddings/wordEmbeddings.npy",
         "npzModel":"../../resources/embeddings/wordEmbeddings",

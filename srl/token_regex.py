@@ -30,6 +30,20 @@
 
 import unicodedata
 import re
+import pandas as pd
+
+
+def splitTokens(line, items):
+    temp = parseCSVLine(line).split(' ')
+    for t in temp:
+        items.add(t)
+
+def extractAllTokens(csvFile, columnName='sentence'):
+    originalData = pd.read_csv(csvFile)
+    items = set()
+    originalData[columnName].apply(lambda x: splitTokens(x, items))
+    return items
+
 
 def parseCSVLine(line, toLower=True, numberTransform='#', removeAccents=True, strip=True):
     """

@@ -56,6 +56,74 @@ class Embedding(object):
     def getVocabulary(self):
         pass
 
+class HybridModel(Embedding):
+
+    def __init__(self):
+        super(HybridModel, self).__init__()
+        self.npzModel = None
+        self.npzFile = None
+        self.resourcesReady = False
+        self.model = None
+        self.weights = None
+
+
+    def setResources(self, options):
+        self.npzModel = options["npzModel"]
+        self.npzFile = options["npzFile"]
+        self.word2idxFile = options["w2idxFile"]
+        self.resourcesReady = True
+
+
+    def getVocabulary(self):
+        assert self.resourcesReady
+        return self.word2idxFile
+
+    def getWeights(self):
+        assert self.resourcesReady
+        return self.weights
+
+    def __processFile(self):
+        with open(self.word2idxFile, 'w') as f:
+            f.write(json.dumps(self.word2idx))
+        f.close()
+
+        np.save(self.npzModel, self.weights)
+
+    def __loadModel(self):
+        """
+        In this model the files are
+        :param files:
+        :return:
+        """
+        assert self.resourcesReady
+        with open(self.word2idxFile, 'r') as f:
+            vocab = json.loads(f.read())
+        weightMatrix = np.load(self.npzFile)
+        return (vocab, weightMatrix)
+
+    def prepare(self):
+        if not isfile(self.npzFile):
+            self.__processFile()
+        self.word2idxFile, self.weights = self.__loadModel()
+
+    def generateCorpus(self, tokens, originalWeights, originalWord2idx):
+        self.word2idx={}
+        if originalWord2idx != None:
+            dimensions = originalWeights.shape[1]
+            self.weights = np.ndarray(shape=(0, dimensions), dtype=float)
+
+        currIdx = 0
+        for t in tokens:
+            self.word2idx[t] = currIdx
+            try:
+                originalIdx = originalWord2idx[t]
+                self.weights = np.vstack((self.weights, originalWeights[originalIdx]))
+            except:
+                self.weights = np.vstack((self.weights, np.random.rand(1, dimensions)))
+            currIdx+=1
+
+
+
 
 
 class W2VModel(Embedding):
@@ -68,6 +136,7 @@ class W2VModel(Embedding):
         self.resourcesReady = False
         self.model = None
         self.weights = None
+        self.word2idx = None
 
 
     def setResources(self, options):
@@ -126,12 +195,12 @@ class W2VModel(Embedding):
     def prepare(self):
         if not isfile(self.npzFile):
             self.__processFile()
-        self.word2idxFile, self.weights = self.__loadModel()
+        self.word2idx, self.weights = self.__loadModel()
 
 
     def getVocabulary(self):
         assert self.resourcesReady
-        return self.word2idxFile
+        return self.word2idx
 
     def getWeights(self):
         assert self.resourcesReady
@@ -163,6 +232,9 @@ class EmbeddingLoader(object):
     def __createInvertedIndex(self, word2idx):
         return dict([(v, k) for k, v in word2idx.items()])
 
+
+    def getValues(self):
+        return self.word2idx, self.idx2word, self.weights
 
 
 

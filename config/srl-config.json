@@ -1,5 +1,7 @@
 {
+  "trainingEpochs":10,
   "embeddingSize":150,
+  "trainableEmbeddings":false,
   "recurrentActivation":"hard_sigmoid",
   "activation":"tanh",
   "lstmCells":300,
