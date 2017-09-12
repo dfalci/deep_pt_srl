@@ -80,7 +80,7 @@ class ModelEvaluation(object):
         self.maxF1 = 0
         self.persistence = ModelPersistence()
         self.pattern = Config.Instance().resultsDir+'/model_'
-        self.numberToKeep = self.numberToKeep
+        self.numberToKeep = numberToKeep
         self.savedFiles = []
 
 
