@@ -1,17 +1,18 @@
 {
   "trainingEpochs":10,
   "embeddingSize":150,
-  "trainableEmbeddings":false,
+  "embeddingType":"hybrid",
+  "trainableEmbeddings":true,
   "recurrentActivation":"hard_sigmoid",
   "activation":"tanh",
   "lstmCells":300,
-  "dropout":0.15,
-  "recurrentDropout":0.1,
+  "dropout":0.35,
+  "recurrentDropout":0.2,
   "classes":39,
   "optimizer":"adam",
   "lossFunction":"categorical_crossentropy",
   "learningRate":0.001,
-  "patience":2,
-  "decayRate":0.5,
-  "maxReductions":10
+  "patience":5,
+  "decayRate":0.7,
+  "maxReductions":15
 }
