@@ -41,7 +41,7 @@ from contraction_handler import ContractionHandler
 
 class PropBankParser(object):
 
-    def __init__(self, propBankPath, verbNetPath, outputDirectory='../resources/corpus/converted'):
+    def __init__(self, propBankPath, verbNetPath, outputDirectory='../resources/corpus/converted', seed=13):
         """
         PropBank.br v1.1 - Parser to the format employed in our approach
         :param propBankPath:
@@ -54,6 +54,7 @@ class PropBankParser(object):
         self.outputDirectory = outputDirectory
         self.verbNet = None
         self.contractionHandler = ContractionHandler()
+        self.seed = seed
 
     def prepare(self):
         """
@@ -345,7 +346,7 @@ class PropBankParser(object):
         :param partitions:
         :return:
         """
-        random.seed(13)
+        random.seed(self.seed)
         if shuffles:
             random.shuffle(propositions)# shuffles propositions and split it
         devIdx = int(math.ceil((len(propositions) * partitions[1])))

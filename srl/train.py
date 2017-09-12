@@ -57,13 +57,15 @@ np.random.seed(4)
 print 'loading configuration'
 config = Config.Instance()
 config.prepare(Utils.getWorkingDirectory())
-ModelConfig.Instance().prepare(config.srlConfig+'/srl-config.json')
+
+modelConfig = ModelConfig.Instance()
+modelConfig.prepare(config.srlConfig+'/srl-config.json')
 print 'configuration loaded'
 
 
 
-print 'loading word embeddings'
-sentenceLoader, predicateLoader = getEmbeddings(config, 'w2v')
+print 'loading word embeddings {}'.format(modelConfig.embeddingType)
+sentenceLoader, predicateLoader = getEmbeddings(config, modelConfig.embeddingType)
 nnUtils = NNUtils.Instance()
 nnUtils.setWordUtils(sentenceLoader.word2idx, sentenceLoader.idx2word)
 print 'loaded'
@@ -88,7 +90,7 @@ container = batcher.getBatches()
 
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
-lrReducer = LrReducer(ModelConfig.Instance().patience, ModelConfig.Instance().decayRate, ModelConfig.Instance().maxReductions)
+lrReducer = LrReducer(modelConfig.patience, modelConfig.decayRate, modelConfig.maxReductions)
 msaver = ModelEvaluation()
 print 'prepared'
 
@@ -127,6 +129,7 @@ for epoch in xrange(number_of_epochs):
     evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch+1), config.resourceDir+'/srl-eval.pl')
     evaluation = evaluator.evaluate()
     f1 = evaluation["macroF1"]
+    print 'F1-SCORE : {}'.format(f1)
     lrReducer.onEpochEnd(nn, f1)
     print "%.2f sec for evaluation" % (time.time() - start_time)
 

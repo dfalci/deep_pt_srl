@@ -41,25 +41,27 @@ from function_utils import Utils
 from prepare_hybrid_embeddings import prepareEmbeddings
 
 
-np.random.seed(4)
+seed = 4
+np.random.seed(seed)
 
 
 print 'loading configuration'
 config = Config.Instance()
 config.prepare(Utils.getWorkingDirectory())
 print 'base directory : {}'.format(config.baseDir)
-ModelConfig.Instance().prepare(config.srlConfig+'/srl-config.json')
+modelConfig = ModelConfig.Instance()
+modelConfig.prepare(config.srlConfig+'/srl-config.json')
 print 'configuration loaded'
 
 
 print 'converting from propbank format : partition 0.95, 0.05. no development set'
-parser = PropBankParser(config.corpusDir+'/PropBankBr_v1.1_Const.conll.txt', config.corpusDir+'/verbnet_gold.csv')
+parser = PropBankParser(config.corpusDir+'/PropBankBr_v1.1_Const.conll.txt', config.corpusDir+'/verbnet_gold.csv', seed=seed)
 parser.prepare()
 parser.generateFeatures(outputDirectory=config.convertedCorpusDir, partition=(0.95, 0, 0.05))
 print 'conversion ready'
 
-print 'loading embedding model'
-sentLoader, predLoader = prepareEmbeddings(config, 'hybrid')
+print 'loading embedding model {}'.format(modelConfig.embeddingType)
+sentLoader, predLoader = prepareEmbeddings(config, modelConfig.embeddingType)
 print 'embeddings loaded'
 
 

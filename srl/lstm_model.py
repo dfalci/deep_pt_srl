@@ -60,12 +60,16 @@ class LSTMModel(object):
         conc = Concatenate(axis=-1, name='concatenate')([embedding, embeddingPredicate, inputAux])
 
         bi = Bidirectional(LSTM(self.config.lstmCells, activation=self.config.activation, recurrent_activation=self.config.recurrentActivation, recurrent_dropout=self.config.recurrentDropout, dropout=self.config.dropout, return_sequences=True))(conc)
+        bi = Dropout(self.config.dropout)(bi)
 
         bi = Bidirectional(LSTM(self.config.lstmCells, activation=self.config.activation, recurrent_activation=self.config.recurrentActivation, recurrent_dropout=self.config.recurrentDropout, dropout=self.config.dropout, return_sequences=True))(bi)
+        bi = Dropout(self.config.dropout)(bi)
 
         bi = Bidirectional(LSTM(self.config.lstmCells, activation=self.config.activation, recurrent_activation=self.config.recurrentActivation, recurrent_dropout=self.config.recurrentDropout, dropout=self.config.dropout, return_sequences=True))(bi)
+        bi = Dropout(self.config.dropout)(bi)
 
         bi = Bidirectional(LSTM(self.config.lstmCells, activation=self.config.activation, recurrent_activation=self.config.recurrentActivation, recurrent_dropout=self.config.recurrentDropout, dropout=self.config.dropout, return_sequences=True))(bi)
+        bi = Dropout(self.config.dropout)(bi)
 
         output = TimeDistributed(Dense(units=self.config.classes, activation='softmax'), name='output')(bi)
 
