@@ -31,34 +31,112 @@
 
 from keras import backend as K
 
+
 class LrReducer(object):
 
-    def __init__(self, patience=4, reduceRate=0.75, maxReductions=20):
-        self.patience =patience
-        self.roundsAwaiting = 0
+    def __init__(self, trainingEpochs):
+        self.trainingEpochs = trainingEpochs
         self.bestF1 = 0
-        self.reduceRate = reduceRate
-        self.maxReductions = maxReductions
+        self.reductions = 0
+        self.bestEpoch = 0
+        self.currentEpoch = 0
+
+    def setNetwork(self, nn):
+        self.nn = nn
+
+    def registerScore(self, newF1, epoch):
+        self.currentEpoch = epoch
+        if newF1 > self.bestF1:
+            self.bestF1 = newF1
+            print 'NEW BEST F1 : {}'.format(self.bestF1)
+            return True
+        return False
+
+
+    def onEpochEnd(self, f1, epoch):
+        pass
+
+    def setParameters(self, options):
+        pass
+
+    def getLearningRate(self):
+        return K.get_value(self.nn.optimizer.lr)
+
+    def calculateNewLr(self):
+        pass
+
+    def setLearningRate(self, new_lr):
+        print 'NEW LEARNING RATE : {}'.format(new_lr)
+        K.set_value(self.nn.optimizer.lr, new_lr)
+
+
+class RateBasedLrReducer(LrReducer):
+
+    def __init__(self, trainingEpochs):
+        super(RateBasedLrReducer, self).__init__(trainingEpochs)
+
+    def onEpochEnd(self, f1, epoch):
+        self.registerScore(f1, epoch)
+        self.calculateNewLr()
+
+    def calculateNewLr(self):
+        lr = self.getLearningRate()
+        decay = lr / float(self.trainingEpochs)
+        new_lr = lr * 1/(1 + decay * self.currentEpoch)
+        self.setLearningRate(new_lr)
+
+class PatienceBaseLrReducer(LrReducer):
+
+    def __init__(self, trainingEpochs):
+        super(PatienceBaseLrReducer, self).__init__(trainingEpochs)
+        self.roundsAwaiting = 0
+        self.reduceRate = 0.7
+        self.patience = 4
+        self.maxReductions = 15
         self.reductions = 0
 
 
-    def onEpochEnd(self, nn, f1Score):
-        if f1Score > self.bestF1:
-            self.bestF1 = f1Score
+    def onEpochEnd(self, f1, epoch):
+        if self.registerScore(f1, epoch):
             self.roundsAwaiting = 0
-            print 'current best f1 : {}'.format(self.bestF1)
         else:
-            if self.roundsAwaiting >= self.patience:
-                if (self.reductions <= self.maxReductions):
-                    lr = K.get_value(nn.optimizer.lr)
-                    new_lr = lr * self.reduceRate
-                    K.set_value(nn.optimizer.lr, new_lr)
-                    print 'current learning rate : {} - new_lr : {}'.format(lr, new_lr)
-                    self.roundsAwaiting = 0
-                    self.reductions+=1
+            if self.roundsAwaiting > self.patience and self.reductions < self.maxReductions:
+                self.calculateNewLr()
+                self.roundsAwaiting = 0
             else:
-                self.roundsAwaiting+=1
-                print 'incremented rounds awaiting {}'.format(self.roundsAwaiting)
+                self.roundsAwaiting += 1
+                print 'rounds awaiting : {}'.format(self.roundsAwaiting)
+
+    def calculateNewLr(self):
+        lr = self.getLearningRate()
+        new_lr = lr * self.reduceRate
+        self.setLearningRate(new_lr)
+        self.reductions +=1
+
+
+
+
+if __name__ == '__main__':
+    trainingEpochs = 300
+    lr = 0.001
+    decay = lr * float(trainingEpochs) / 100
+    print decay
+    temp = []
+    for epoch in xrange(0, trainingEpochs):
+
+        lr = lr * 1/(1 + decay * epoch)
+        print lr
+        temp.append(lr)
+
+    from pylab import *
+
+    plot(temp)
+
+    xlabel('time')
+    ylabel('learning rate')
+    title('Learning rate decay')
+    grid(True)
+    show()
 
 
 

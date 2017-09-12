@@ -15,5 +15,5 @@
   "patience":5,
   "decayRate":0.7,
   "maxReductions":15,
-  "checkpointsToKeep":30
+  "checkpointsToKeep":10
 }

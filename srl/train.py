@@ -30,7 +30,7 @@
 
 from lstm_model import LSTMModel
 from model_persistence import ModelEvaluation, ModelPersistence
-from lr_reducer import LrReducer
+from lr_reducer import RateBasedLrReducer
 from inference import SRLInference
 from batcher import Batcher
 from emb_loader import EmbeddingLoader, W2VModel
@@ -90,7 +90,7 @@ container = batcher.getBatches()
 
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
-lrReducer = LrReducer(modelConfig.patience, modelConfig.decayRate, modelConfig.maxReductions)
+lrReducer = RateBasedLrReducer(modelConfig.trainingEpochs)
 msaver = ModelEvaluation(modelConfig.checkpointsToKeep)
 print 'prepared'
 
@@ -98,6 +98,7 @@ print 'creating neural network model'
 model = LSTMModel(ModelConfig.Instance())
 nn = model.create(sentenceLoader.weights, predicateLoader.weights)
 nn.summary()
+lrReducer.setNetwork(nn)
 print 'model loaded'
 
 
@@ -130,7 +131,7 @@ for epoch in xrange(number_of_epochs):
     evaluation = evaluator.evaluate()
     f1 = evaluation["macroF1"]
     print 'F1-SCORE : {}'.format(f1)
-    lrReducer.onEpochEnd(nn, f1)
+    lrReducer.onEpochEnd(f1, epoch+1)
     print "%.2f sec for evaluation" % (time.time() - start_time)
 
     print "saving checkpoint if needed"

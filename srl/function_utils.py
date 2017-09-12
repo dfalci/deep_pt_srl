@@ -35,6 +35,6 @@ class Utils(object):
     @staticmethod
     def getWorkingDirectory():
         #return __root__.path()
-        return '/Users/danielfalci/Dropbox/Experimentos/dissertacao/deep_pt_srl'
+        return '/home/daniel/development/mscs/deep_pt_srl'
 
 

@@ -43,15 +43,21 @@ class ContractionHandler(object):
         self.pronoun_crass = ['aquele', 'aqueles', 'aquela', 'aquelas', 'aquilo']
         self.ref = ['o', 'os', 'a', 'as', 'me', 'se', 'te', 'vos', 'lhe', 'lho', 'lhas', 'lhos', 'lha', 'lo', 'la', 'los', 'las', 'lhes', 'no', 'na', 'nos']
 
-    def mark(self, lowerPattern, upperPattern, currentToken, nextToken, nextTokenAddition, currentRole, tokenList, roleList):
+    def mark(self, lowerPattern, upperPattern, currentToken, nextToken, nextTokenAddition, currentRole, nextRole, tokenList, roleList):
+        role = currentRole
+        if currentRole == u'O' and nextRole != u'O':
+            role = nextRole
         start = upperPattern if currentToken[0].isupper() else lowerPattern
         tokenList.append(start+nextTokenAddition)
-        roleList.append(currentRole)
+        roleList.append(role)
         return True
 
-    def markSimple(self, currentToken, nextToken, currentRole, tokenList, roleList):
+    def markSimple(self, currentToken, nextToken, currentRole, nextRole, tokenList, roleList):
+        role = currentRole
+        if currentRole == u'O' and nextRole != u'O':
+            role = nextRole
         tokenList.append(currentToken+nextToken)
-        roleList.append(currentRole)
+        roleList.append(role)
         return True
 
 
@@ -71,7 +77,9 @@ class ContractionHandler(object):
             try:
                 currentToken = tokens[i]
                 currentRole = roles[i]
+                nextRole = roles[i+1]
                 nextToken = tokens[i+1]
+
 
             except IndexError:
                 if not contracted:
@@ -84,26 +92,26 @@ class ContractionHandler(object):
                 continue
 
             if currentToken.lower() == 'de' and nextToken.lower() in (self.article + self.pronoun + self.pronoun_crass + self.adverb):
-                contracted = self.mark('d', 'D', currentToken, nextToken, nextToken.lower(), currentRole, return_tokens, return_roles)
+                contracted = self.mark('d', 'D', currentToken, nextToken, nextToken.lower(), currentRole, nextRole, return_tokens, return_roles)
 
             elif currentToken.lower() == 'em' and nextToken.lower() in (self.article + self.pronoun + self.pronoun_crass):
-                contracted = self.mark('n', 'N', currentToken, nextToken, nextToken.lower(), currentRole, return_tokens, return_roles)
+                contracted = self.mark('n', 'N', currentToken, nextToken, nextToken.lower(), currentRole, nextRole, return_tokens, return_roles)
 
             elif currentToken.lower() == 'por' and nextToken in self.article:
-                contracted = self.mark('pel', 'Pel', currentToken, nextToken, nextToken.lower(), currentRole, return_tokens, return_roles)
+                contracted = self.mark('pel', 'Pel', currentToken, nextToken, nextToken.lower(), currentRole, nextRole, return_tokens, return_roles)
 
             elif currentToken.lower() == 'a':
                 if nextToken.lower() in self.pronoun_crass:
-                    contracted = self.mark(u'à', u'À', currentToken, nextToken, nextToken[1:].lower(), currentRole, return_tokens, return_roles)
+                    contracted = self.mark(u'à', u'À', currentToken, nextToken, nextToken[1:].lower(), currentRole, nextRole, return_tokens, return_roles)
                 elif nextToken.lower() in self.article_masc:
-                    contracted = self.mark('a', 'A', currentToken, nextToken, nextToken.lower(), currentRole, return_tokens, return_roles)
+                    contracted = self.mark('a', 'A', currentToken, nextToken, nextToken.lower(), currentRole, nextRole, return_tokens, return_roles)
                 elif nextToken.lower() == 'a':
-                    contracted = self.mark(u'à', u'À', currentToken, nextToken, '', currentRole, return_tokens, return_roles)
+                    contracted = self.mark(u'à', u'À', currentToken, nextToken, '', currentRole, nextRole, return_tokens, return_roles)
                 elif nextToken.lower() == 'as':
-                    contracted = self.mark(u'às', u'Às', currentToken, nextToken, '', currentRole, return_tokens, return_roles)
+                    contracted = self.mark(u'às', u'Às', currentToken, nextToken, '', currentRole, nextRole, return_tokens, return_roles)
             elif currentToken[len(currentToken)-1] == '-':
                 if nextToken.lower() in self.ref:
-                    contracted = self.markSimple(currentToken, nextToken, currentRole, return_tokens, return_roles)
+                    contracted = self.markSimple(currentToken, nextToken, currentRole, nextRole, return_tokens, return_roles)
 
             if contracted == False:
                 return_tokens.append(currentToken)
@@ -116,15 +124,21 @@ class ContractionHandler(object):
 
 
 if __name__ == '__main__':
-    tokens = [u'\xab', u'C\xe2mera', u'Manchete', u'\xbb', u'\xe9', u'o', u'nome', u'de', u'o', u'novo', u'programa', u'jornal\xedstico', u'que', u'estr\xe9ia', u'quarta-feira', u',', u'a', u'as', u'22h30', u',', u'em', u'a', u'Rede', u'Manchete', u'.']
+    #tokens = [u'\xab', u'C\xe2mera', u'Manchete', u'\xbb', u'\xe9', u'o', u'nome', u'de', u'o', u'novo', u'programa', u'jornal\xedstico', u'que', u'estr\xe9ia', u'quarta-feira', u',', u'a', u'as', u'22h30', u',', u'em', u'a', u'Rede', u'Manchete', u'.']
 
-    teste = ContractionHandler().execute(tokens, tokens)
+    #teste = ContractionHandler().execute(tokens, tokens)
 
-    print teste[0]
-    print teste[1]
+    #print teste[0]
+    #print teste[1]
 
-    tokens = [u'O', u'rei', u'tornou-', u'o', u'cavaleiro']
-    teste = ContractionHandler().execute(tokens, tokens)
+    texto = u'nao há hipótese de o plano real ser lançado'
+    roles = u'O O O O B-A1 I-A1 O O V'
+
+
+    tokens = texto.split(' ')
+    roles = roles.split(' ')
+
+    teste = ContractionHandler().execute(tokens, roles)
 
     print teste[0]
     print teste[1]
