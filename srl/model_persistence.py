@@ -57,8 +57,8 @@ class ModelPersistence(object):
 
     def delete(self, modelFile, weightFile):
         try:
-            os.removeFile(modelFile)
-            os.removeFile(weightFile)
+            os.remove(modelFile)
+            os.remove(weightFile)
         except:
             print 'error removing file'
             pass
@@ -75,26 +75,47 @@ class ModelPersistence(object):
 
 class ModelEvaluation(object):
 
-    def __init__(self):
+    def __init__(self, numberToKeep=30):
         self.bestEpoch = None
         self.maxF1 = 0
         self.persistence = ModelPersistence()
         self.pattern = Config.Instance().resultsDir+'/model_'
+        self.numberToKeep = self.numberToKeep
+        self.savedFiles = []
 
 
     def __getNames(self, epoch):
         return (self.pattern+str(epoch)+'.json',self.pattern+str(epoch)+'.h5py')
 
+    def __save(self, nn, epoch):
+        modelFile, wFile = self.__getNames(epoch)
+        self.persistence.save(nn, modelFile, wFile)
+        self.savedFiles.append((modelFile, wFile))
+        print 'Checkpoint saved'
+        self.__removeIfNeeded()
 
-    def update(self, nn, f1, epoch):
+    def __removeIfNeeded(self):
+        if len(self.savedFiles) > self.numberToKeep:
+            item = self.savedFiles.pop(0)
+            print 'removing {} - {}'.format(item[0], item[1])
+            self.persistence.delete(item[0], item[1])
+            print 'files have been removed'
+
+
+    def update(self, nn, f1, epoch, fixedCheckPoint=10):
         if f1 > self.maxF1:
             print 'NEW BEST VALUE IN EPOCH {} : {} \nSaving checkpoint...'.format(epoch, f1)
             if self.bestEpoch!=None:
                 modelFile, wFile = self.__getNames(self.bestEpoch)
                 self.persistence.delete(modelFile, wFile)
 
-            modelFile, wFile = self.__getNames(epoch)
-            self.persistence.save(nn, modelFile, wFile)
-            print 'checkpoint saved'
+            self.__save(nn, epoch)
+
             self.bestEpoch = epoch
             self.maxF1 = f1
+        else:
+            if epoch % fixedCheckPoint ==0 and epoch > 0:
+                print 'Fixed checkpoint {}'.format(fixedCheckPoint)
+                self.__save(nn, epoch)
+            else:
+                print 'Not saving'

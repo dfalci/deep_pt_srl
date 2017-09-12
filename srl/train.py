@@ -91,7 +91,7 @@ container = batcher.getBatches()
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
 lrReducer = LrReducer(modelConfig.patience, modelConfig.decayRate, modelConfig.maxReductions)
-msaver = ModelEvaluation()
+msaver = ModelEvaluation(modelConfig.checkpointsToKeep)
 print 'prepared'
 
 print 'creating neural network model'

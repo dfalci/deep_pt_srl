@@ -14,5 +14,6 @@
   "learningRate":0.001,
   "patience":5,
   "decayRate":0.7,
-  "maxReductions":15
+  "maxReductions":15,
+  "checkpointsToKeep":30
 }
