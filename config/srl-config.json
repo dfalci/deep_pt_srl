@@ -1,5 +1,5 @@
 {
-  "trainingEpochs":10,
+  "trainingEpochs":50,
   "embeddingSize":150,
   "embeddingType":"hybrid",
   "trainableEmbeddings":true,

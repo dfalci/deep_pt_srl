@@ -81,8 +81,10 @@ class RateBasedLrReducer(LrReducer):
 
     def calculateNewLr(self):
         lr = self.getLearningRate()
-        decay = lr / float(self.trainingEpochs)
+
+        decay = lr * float(self.currentEpoch) / (self.trainingEpochs)
         new_lr = lr * 1/(1 + decay * self.currentEpoch)
+
         self.setLearningRate(new_lr)
 
 class PatienceBaseLrReducer(LrReducer):
@@ -119,11 +121,12 @@ class PatienceBaseLrReducer(LrReducer):
 if __name__ == '__main__':
     trainingEpochs = 300
     lr = 0.001
-    decay = lr * float(trainingEpochs) / 100
-    print decay
-    temp = []
-    for epoch in xrange(0, trainingEpochs):
 
+    #decay = 0.001
+
+    temp = []
+    for epoch in xrange(1, trainingEpochs):
+        decay = lr * (float(epoch) / trainingEpochs)
         lr = lr * 1/(1 + decay * epoch)
         print lr
         temp.append(lr)
