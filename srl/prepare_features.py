@@ -41,7 +41,7 @@ from function_utils import Utils
 from prepare_hybrid_embeddings import prepareEmbeddings
 
 
-seed = 4
+seed = 27
 np.random.seed(seed)
 
 

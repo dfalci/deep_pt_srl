@@ -93,7 +93,7 @@ class PatienceBaseLrReducer(LrReducer):
         super(PatienceBaseLrReducer, self).__init__(trainingEpochs)
         self.roundsAwaiting = 0
         self.reduceRate = 0.7
-        self.patience = 4
+        self.patience = 3
         self.maxReductions = 15
         self.reductions = 0
 

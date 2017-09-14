@@ -107,6 +107,8 @@ class HybridModel(Embedding):
         self.word2idxFile, self.weights = self.__loadModel()
 
     def generateCorpus(self, tokens, originalWeights, originalWord2idx):
+        unkWords = []
+        unkCount = 0
         self.word2idx={}
         if originalWord2idx != None:
             dimensions = originalWeights.shape[1]
@@ -120,7 +122,12 @@ class HybridModel(Embedding):
                 self.weights = np.vstack((self.weights, originalWeights[originalIdx]))
             except:
                 self.weights = np.vstack((self.weights, np.random.rand(1, dimensions)))
+                unkCount+=1
+                unkWords.append(t)
             currIdx+=1
+
+        print 'palavras desconhecidas - {}'.format(unkCount)
+        print unkWords
 
 
 

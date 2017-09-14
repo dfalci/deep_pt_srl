@@ -30,7 +30,7 @@
 
 from lstm_model import LSTMModel
 from model_persistence import ModelEvaluation, ModelPersistence
-from lr_reducer import RateBasedLrReducer
+from lr_reducer import RateBasedLrReducer, PatienceBaseLrReducer
 from inference import SRLInference
 from batcher import Batcher
 from emb_loader import EmbeddingLoader, W2VModel
@@ -52,7 +52,7 @@ def showProgress(currentStep, totalSteps):
     sys.stdout.write('\r[{0}] {1}% - {2}/{3}'.format('#'*int(temp), (perc), currentStep, totalSteps))
     sys.stdout.flush()
 
-np.random.seed(4)
+np.random.seed(13)
 
 print 'loading configuration'
 config = Config.Instance()
@@ -90,7 +90,7 @@ container = batcher.getBatches()
 
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
-lrReducer = RateBasedLrReducer(modelConfig.trainingEpochs)
+lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs)
 msaver = ModelEvaluation(modelConfig.checkpointsToKeep)
 print 'prepared'
 
