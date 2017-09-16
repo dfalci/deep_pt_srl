@@ -33,6 +33,8 @@ from keras.layers import Dense, Dropout, LSTM, Embedding
 from keras.layers.wrappers import TimeDistributed, Bidirectional
 from keras.layers.merge import Concatenate
 from keras.engine import Input
+from model.persistence import ModelPersistence
+from keras import backend as K
 
 
 
@@ -45,6 +47,16 @@ class LSTMModel(object):
         :return:
         """
         self.config = modelConfig
+        self.modelPersistence = ModelPersistence()
+
+
+    def load(self, modelFile, weightFile, learningRate=None):
+        nn = self.modelPersistence.load(modelFile, weightFile)
+        nn.compile(optimizer=self.config.optimizer, loss=self.config.lossFunction, metrics=['accuracy'])
+        if learningRate != None:
+            K.set_value(nn.optimizer.lr, learningRate)
+        return nn
+
 
     def create(self, tokenMatrix, predMatrix):
 

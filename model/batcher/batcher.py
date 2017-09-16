@@ -85,22 +85,3 @@ class Batcher(object):
         for (sent, pred, aux, label) in zip(sentences, predicates, auxiliar, roles):
             self.add(sent, pred, aux, label)
 
-
-""" def convertToTrainFormat(sent, pred, aux, label, debug = False):
-    sent = np.array(sent)[np.newaxis, :]
-    pred = np.array(pred)[np.newaxis, :]
-    aux = np.array(aux)[np.newaxis, :]
-    label = np.array(label)[np.newaxis, :]
-    if debug:
-        print sent.shape, pred.shape, aux.shape, label.shape
-    return sent, pred, aux, label
-
-numIterations = len(x_train)
-batcher = Batcher()
-for i in xrange(0, numIterations):
-    sent, pred, aux, label = convertToTrainFormat(x_train[i], x_train_predicates[i], xAuxTrain[i], y_train[i])
-    batcher.add(sent, pred, aux, label)
-container = batcher.getBatches()
-
-"""
-

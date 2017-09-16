@@ -34,3 +34,4 @@ from .contraction_handler import ContractionHandler
 from .converter_utils import ConverterUtils
 from .function_utils import Utils
 from .nn_utils import NNUtils
+from .data_utils import getFile, downloadData
