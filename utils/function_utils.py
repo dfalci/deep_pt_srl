@@ -28,18 +28,13 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from singleton import Singleton
-import json
+import __root__
 
-@Singleton
-class ModelConfig(object):
+class Utils(object):
 
-    def __init__(self):
-        self.config = None
+    @staticmethod
+    def getWorkingDirectory():
+        return __root__.path()
+        #return '/Users/danielfalci/Dropbox/Experimentos/dissertacao/deep_pt_srl'
 
-    def prepare(self, configFile):
-        with open(configFile, 'r') as f:
-            self.config = json.loads(f.read())
-        f.close()
-        for k, v in enumerate(self.config):
-            self.__dict__[v] = self.config[v]
+

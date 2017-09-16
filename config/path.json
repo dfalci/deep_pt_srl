@@ -1,8 +1,8 @@
 {
-  "srlConfig":"/home/daniel/development/mscs/deep_pt_srl/config",
-  "resourceDir":"/home/daniel/development/mscs/deep_pt_srl/resources",
-  "corpusDir":"/home/daniel/development/mscs/deep_pt_srl/resources/corpus",
-  "convertedCorpusDir":"/home/daniel/development/mscs/deep_pt_srl/resources/corpus/converted",
-  "embeddingsDir":"/home/daniel/development/mscs/deep_pt_srl/resources/embeddings",
-  "resultsDir":"/home/daniel/development/mscs/deep_pt_srl/results"
+  "srlConfig":"/Users/danielfalci/Dropbox/Experimentos/dissertacao/deep_pt_srl/config",
+  "resourceDir":"/Users/danielfalci/Dropbox/Experimentos/dissertacao/deep_pt_srl/resources",
+  "corpusDir":"/Users/danielfalci/Dropbox/Experimentos/dissertacao/deep_pt_srl/resources/corpus",
+  "convertedCorpusDir":"/Users/danielfalci/Dropbox/Experimentos/dissertacao/deep_pt_srl/resources/corpus/converted",
+  "embeddingsDir":"/Users/danielfalci/Dropbox/Experimentos/dissertacao/deep_pt_srl/resources/embeddings",
+  "resultsDir":"/Users/danielfalci/Dropbox/Experimentos/dissertacao/deep_pt_srl/results"
 }

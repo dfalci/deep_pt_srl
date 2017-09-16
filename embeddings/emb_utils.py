@@ -1,8 +1,5 @@
-
-
-from token_regex import extractAllTokens
-
-from emb_loader import W2VModel, EmbeddingLoader, HybridModel
+from .emb_loader import W2VModel, EmbeddingLoader, HybridModel
+from utils.token_regex import extractAllTokens
 
 def prepareEmbeddings(config, type='w2v'):
 

@@ -28,42 +28,43 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from singleton import Singleton
-import json
 
-@Singleton
-class Config(object):
+import numpy as np
 
-    def __init__(self):
-        self.config = None
+from corpus.corpus_converter import CorpusConverter
+from corpus.propbankbr_parser import PropBankParser
+from embeddings.emb_utils import prepareEmbeddings
+from model.configuration import Config
+from model.configuration.model_config import ModelConfig
+from utils.function_utils import Utils
 
-    def __getNestedReference(self, key):
-        idx = self.config[key].find('${')
-        if idx!=-1:
-            idxE = self.config[key].find('}', idx)
-            return self.config[key][idx+2:idxE]
-        return None
+seed = 27
+np.random.seed(seed)
 
 
-    def prepare(self, baseDir):
-        self.baseDir = baseDir
-        configFile = self.baseDir+'/config/path.json'
-        with open(configFile, 'r') as f:
-            self.config = json.loads(f.read())
-        f.close()
-        for k, v in enumerate(self.config):
-            self.__dict__[v] = self.config[v]
-        self.__fill()
-
-    def __fill(self):
-        for k, v in enumerate(self.config):
-            temp = self.__getNestedReference(v)
-            if temp!=None:
-                self.__dict__[v] = self.__dict__[v].replace('${'+temp+'}', self.__dict__[temp])
+print 'loading configuration'
+config = Config.Instance()
+config.prepare(Utils.getWorkingDirectory())
+print 'base directory : {}'.format(config.baseDir)
+modelConfig = ModelConfig.Instance()
+modelConfig.prepare(config.srlConfig+'/srl-config.json')
+print 'configuration loaded'
 
 
+print 'converting from propbank format : partition 0.95, 0.05. no development set'
+parser = PropBankParser(config.corpusDir+'/PropBankBr_v1.1_Const.conll.txt', config.corpusDir+'/verbnet_gold.csv', seed=seed)
+parser.prepare()
+parser.generateFeatures(outputDirectory=config.convertedCorpusDir, partition=(0.95, 0, 0.05))
+print 'conversion ready'
 
-if __name__ == '__main__':
-    config = Config.Instance()
-    config.prepare('../.')
-    print Config.Instance().resourceDir
+print 'loading embedding model {}'.format(modelConfig.embeddingType)
+sentLoader, predLoader = prepareEmbeddings(config, modelConfig.embeddingType)
+print 'embeddings loaded'
+
+
+print 'creating features'
+csvFiles = [config.convertedCorpusDir+'/propbank_training.csv', config.convertedCorpusDir+'/propbank_test.csv']
+converter = CorpusConverter(csvFiles, sentLoader, predLoader)
+converter.convertAndSave(config.resourceDir+'/feature_file')
+data = converter.load(config.resourceDir+'/feature_file.npy')
+print 'features created'

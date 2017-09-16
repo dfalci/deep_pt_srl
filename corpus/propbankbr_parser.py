@@ -36,7 +36,7 @@ from os.path import join
 
 import unicodecsv as csv
 
-from contraction_handler import ContractionHandler
+from utils import ContractionHandler
 
 
 class PropBankParser(object):

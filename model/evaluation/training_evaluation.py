@@ -33,9 +33,9 @@ import os
 
 import numpy as np
 
-from conll_evaluator import CoNLLEvaluator
-from converter_utils import ConverterUtils
-from token_evaluation import TokenEvaluation
+from model.evaluation.conll_evaluator import CoNLLEvaluator
+from model.evaluation.token_evaluation import TokenEvaluation
+from utils.converter_utils import ConverterUtils
 
 
 class Evaluator(object):

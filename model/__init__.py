@@ -28,13 +28,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from conll_evaluator import CoNLLEvaluator
 from batcher import Batcher
 from inference import SRLInference
-from lr_reducer import LrReducer
 from lstm_model import LSTMModel
-from model_persistence import ModelPersistence,ModelEvaluation
-from nn_corpus_loader import CorpusConverter
-from propbankbr_parser import PropBankParser
-from token_evaluation import TokenEvaluation
-from training_evaluation import Evaluator
+from model.auxiliar.lr_reducer import LrReducer
+from model.evaluation.conll_evaluator import CoNLLEvaluator
+from model.evaluation.token_evaluation import TokenEvaluation
+from model.persistence.model_persistence import ModelPersistence,ModelEvaluation
+
+from .lstm_model import LSTMModel

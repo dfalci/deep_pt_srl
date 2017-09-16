@@ -28,13 +28,44 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import __root__
+import json
 
-class Utils(object):
-
-    @staticmethod
-    def getWorkingDirectory():
-        #return __root__.path()
-        return '/home/daniel/development/mscs/deep_pt_srl'
+from utils import Singleton
 
 
+@Singleton
+class Config(object):
+
+    def __init__(self):
+        self.config = None
+
+    def __getNestedReference(self, key):
+        idx = self.config[key].find('${')
+        if idx!=-1:
+            idxE = self.config[key].find('}', idx)
+            return self.config[key][idx+2:idxE]
+        return None
+
+
+    def prepare(self, baseDir):
+        self.baseDir = baseDir
+        configFile = self.baseDir+'/config/path.json'
+        with open(configFile, 'r') as f:
+            self.config = json.loads(f.read())
+        f.close()
+        for k, v in enumerate(self.config):
+            self.__dict__[v] = self.config[v]
+        self.__fill()
+
+    def __fill(self):
+        for k, v in enumerate(self.config):
+            temp = self.__getNestedReference(v)
+            if temp!=None:
+                self.__dict__[v] = self.__dict__[v].replace('${'+temp+'}', self.__dict__[temp])
+
+
+
+if __name__ == '__main__':
+    config = Config.Instance()
+    config.prepare('../.')
+    print Config.Instance().resourceDir

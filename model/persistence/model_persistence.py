@@ -32,7 +32,7 @@ import os
 
 from keras.models import model_from_json
 
-from config import Config
+from model.configuration import Config
 
 
 class ModelPersistence(object):

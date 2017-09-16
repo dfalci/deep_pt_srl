@@ -1,12 +1,10 @@
+from corpus.corpus_converter import CorpusConverter
+from embeddings.emb_utils import getEmbeddings
+from model.configuration import Config
+from model.configuration.model_config import ModelConfig
+from utils.function_utils import Utils
+from utils.nn_utils import NNUtils
 
-
-from nn_corpus_loader import CorpusConverter
-
-from config import Config
-from model_config import ModelConfig
-from nn_utils import NNUtils
-from function_utils import Utils
-from prepare_hybrid_embeddings import getEmbeddings
 
 def contabilizarUnkPredicates(predicates, predicateLoader):
     idx2word = predicateLoader.idx2word

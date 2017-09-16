@@ -28,46 +28,20 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import json
 
-from emb_loader import EmbeddingLoader, W2VModel
-from nn_corpus_loader import CorpusConverter
-from propbankbr_parser import PropBankParser
-
-import numpy as np
-
-from config import Config
-from model_config import ModelConfig
-from function_utils import Utils
-from prepare_hybrid_embeddings import prepareEmbeddings
+from utils.singleton import Singleton
 
 
-seed = 27
-np.random.seed(seed)
+@Singleton
+class ModelConfig(object):
 
+    def __init__(self):
+        self.config = None
 
-print 'loading configuration'
-config = Config.Instance()
-config.prepare(Utils.getWorkingDirectory())
-print 'base directory : {}'.format(config.baseDir)
-modelConfig = ModelConfig.Instance()
-modelConfig.prepare(config.srlConfig+'/srl-config.json')
-print 'configuration loaded'
-
-
-print 'converting from propbank format : partition 0.95, 0.05. no development set'
-parser = PropBankParser(config.corpusDir+'/PropBankBr_v1.1_Const.conll.txt', config.corpusDir+'/verbnet_gold.csv', seed=seed)
-parser.prepare()
-parser.generateFeatures(outputDirectory=config.convertedCorpusDir, partition=(0.95, 0, 0.05))
-print 'conversion ready'
-
-print 'loading embedding model {}'.format(modelConfig.embeddingType)
-sentLoader, predLoader = prepareEmbeddings(config, modelConfig.embeddingType)
-print 'embeddings loaded'
-
-
-print 'creating features'
-csvFiles = [config.convertedCorpusDir+'/propbank_training.csv', config.convertedCorpusDir+'/propbank_test.csv']
-converter = CorpusConverter(csvFiles, sentLoader, predLoader)
-converter.convertAndSave(config.resourceDir+'/feature_file')
-data = converter.load(config.resourceDir+'/feature_file.npy')
-print 'features created'
+    def prepare(self, configFile):
+        with open(configFile, 'r') as f:
+            self.config = json.loads(f.read())
+        f.close()
+        for k, v in enumerate(self.config):
+            self.__dict__[v] = self.config[v]

@@ -31,8 +31,8 @@
 import numpy as np
 import pandas as pd
 
-from emb_loader import EmbeddingLoader
-from token_regex import parseCSVLine
+from embeddings import EmbeddingLoader
+from utils import parseCSVLine
 
 
 class CorpusConverter(object):
@@ -234,7 +234,7 @@ class CorpusConverter(object):
 
 if __name__ == '__main__':
 
-    from emb_loader import W2VModel
+    from embeddings.emb_loader import W2VModel
 
     options = {
         "npzFile":"../../resources/embeddings/wordEmbeddings.npy",

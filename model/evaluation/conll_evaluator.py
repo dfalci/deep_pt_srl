@@ -32,7 +32,7 @@ import subprocess
 
 class CoNLLEvaluator(object):
     """
-    This class converts role predictions made using the IOB format to the format expected by "srl-eval.pl" - the official evaluation script of CoNLL.
+    This class converts role predictions made using the IOB format to the format expected by "model-eval.pl" - the official evaluation script of CoNLL.
     Notice that this script only works in unix based systems.
     """
 
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
     idx2word= {0:'daniel', 1:'e', 2:'muito', 3:'inteligente', 4:'e', 5:'legal', 6:'.'}
 
-    converter = CoNLLEvaluator('../../resources/srl-eval.pl', idx2word)
+    converter = CoNLLEvaluator('../../resources/model-eval.pl', idx2word)
     for i in xrange(0, len(gold)):
         converter.addSentence(gold[i], predicted[i], predicates[i])
 
