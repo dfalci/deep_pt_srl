@@ -36,6 +36,7 @@ import numpy as np
 from model.evaluation.conll_evaluator import CoNLLEvaluator
 from model.evaluation.token_evaluation import TokenEvaluation
 from utils.converter_utils import ConverterUtils
+from keras import backend as K
 
 
 class Evaluator(object):
@@ -69,7 +70,9 @@ class Evaluator(object):
         self.tokenEvaluation = TokenEvaluation(self.tagMap, self.tagList)
         self.officialEvaluation = CoNLLEvaluator(conllFile, self.nnUtils.idx2word)
         self.targetDirectory = targetDirectory
+        self.learningRate = K.get_value(self.nn.optimizer.lr)
         self.__createDirectoryIfNeeded(self.targetDirectory)
+
 
 
     def evaluate(self):
@@ -83,15 +86,16 @@ class Evaluator(object):
             self.tokenEvaluation.addSample(golden, y)
             self.officialEvaluation.addSentence(ConverterUtils.fromIndexToRoles(golden, self.tagList), ConverterUtils.fromIndexToRoles(y, self.tagList), pred[0][0])
 
-        evaluation = self.tokenEvaluation.calculate()
+        evaluation = self.tokenEvaluation.calculate(self.learningRate)
+
+        self.officialEvaluation.write(self.targetDirectory+'/official.txt', self.targetDirectory+'/goldprops.props', self.targetDirectory+'/pred.props')
+        official = self.officialEvaluation.readScoreFromFile(self.targetDirectory+'/official.txt')
+        evaluation = dict(evaluation.items() + official.items())
         self.evaluations.append(evaluation)
-
-        self.__writeResults()
-
+        self.__writeEvaluationSequence()
         return evaluation
 
-    def __writeResults(self):
+    def __writeEvaluationSequence(self):
         with open(self.generalResultFile, 'w') as f:
             f.write(json.dumps(self.evaluations))
             f.close()
-        self.officialEvaluation.write(self.targetDirectory+'/official.txt', self.targetDirectory+'/goldprops.props', self.targetDirectory+'/pred.props')

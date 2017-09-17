@@ -39,7 +39,7 @@ class TokenEvaluation(object):
         return pd.DataFrame(self.matrix, columns=self.tagList, index=self.tagList)
 
 
-    def calculate(self, column=None):
+    def calculate(self, lr=0, column=None):
         correct = 0
         totalRows = 0
         totalColumns = 0
@@ -77,7 +77,7 @@ class TokenEvaluation(object):
         macroRecall =  recall.sum(axis=0)/float(self.nClasses - discount)
         macroF1 = f1.sum(axis=0)/float(self.nClasses - discount)
 
-        return {'macroPrecision':macroPrecision, 'macroRecall':macroRecall, 'macroF1':macroF1, 'measuresPerTag':tagResult}
+        return {'tokenMacroPrecision':macroPrecision, 'tokenMacroRecall':macroRecall, 'tokenMacroF1':macroF1, 'tokenMeasuresPerTag':tagResult, 'lr':float(lr)}
 
 
 

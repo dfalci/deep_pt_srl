@@ -1,9 +1,13 @@
 from .emb_loader import W2VModel, EmbeddingLoader, HybridModel
 from utils.token_regex import extractAllTokens
-
-def prepareEmbeddings(config, type='w2v'):
+def prepareEmbeddings(config, type='w2v', useWiki=True):
 
     tokens = extractAllTokens(config.convertedCorpusDir+'/propbank_full.csv')
+    if useWiki:
+        tokens.update(extractAllTokens(config.convertedCorpusDir+'/wiki.csv'))
+
+    print '{} tokens found'.format(len(tokens))
+
     predicates = extractAllTokens(config.convertedCorpusDir+'/propbank_full.csv', 'predicate')
 
 
@@ -30,6 +34,7 @@ def prepareEmbeddings(config, type='w2v'):
 
     sentHybrid = HybridModel()
     sentHybrid.setResources(sentHybridFiles)
+    print 'creating sentence corpus'
     sentHybrid.generateCorpus(tokens, weights, word2idx)
     Hloader = EmbeddingLoader(sentHybrid)
     Hword2idx, Hidx2word, Hweights = Hloader.process()
@@ -43,6 +48,7 @@ def prepareEmbeddings(config, type='w2v'):
 
     predHybrid = HybridModel()
     predHybrid.setResources(predHybridFiles)
+    print 'creating predicate corpus'
     predHybrid.generateCorpus(predicates, weights, word2idx)
     Ploader = EmbeddingLoader(predHybrid)
     Pword2idx, Pidx2word, Pweights = Ploader.process()

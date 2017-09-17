@@ -35,6 +35,6 @@ loader = EmbeddingLoader(w2v)
 word2idx, idx2word, weights = loader.process()
 
 c = CorpusCreator(80000, predicates, word2idx)
-c.scanWikipediaCorpus(config.corpusDir+'/wiki.csv')
+c.scanWikipediaCorpus(config.convertedCorpusDir+'/wiki.csv')
 
 

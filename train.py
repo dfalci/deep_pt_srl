@@ -92,7 +92,7 @@ container = batcher.getBatches()
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
 lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs)
-msaver = ModelEvaluation(modelConfig.checkpointsToKeep)
+msaver = ModelEvaluation()
 print 'prepared'
 
 print 'creating neural network model'
@@ -128,15 +128,23 @@ for epoch in xrange(number_of_epochs):
     print '\n'
     print 'end of epoch in  {}... evaluating'.format((time.time() - start_time))
     start_time = time.time()
-    evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch+1), config.resourceDir+'/model-eval.pl')
+
+    evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch+1), config.resourceDir+'/srl-eval.pl')
     evaluation = evaluator.evaluate()
-    f1 = evaluation["macroF1"]
-    print 'F1-SCORE : {}'.format(f1)
-    lrReducer.onEpochEnd(f1, epoch+1)
+
+    tokenf1 = evaluation["tokenMacroF1"]
+    officialf1 = evaluation["officialF1"]
+
+
+    print 'TOKEN F1-SCORE : {}'.format(tokenf1)
+    print 'OFFICIAL F1-SCORE : {}'.format(officialf1)
+
+    lrReducer.onEpochEnd(tokenf1, epoch+1)
+
     print "%.2f sec for evaluation" % (time.time() - start_time)
 
     print "saving checkpoint if needed"
-    msaver.update(nn, f1, epoch+1)
+    msaver.update(nn, officialf1, epoch+1)
 
 
 print 'ended training'

@@ -29,10 +29,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import subprocess
+import re
 
 class CoNLLEvaluator(object):
     """
-    This class converts role predictions made using the IOB format to the format expected by "model-eval.pl" - the official evaluation script of CoNLL.
+    This class converts role predictions made using the IOB format to the format expected by "srl-eval.pl" - the official evaluation script of CoNLL.
     Notice that this script only works in unix based systems.
     """
 
@@ -105,6 +106,23 @@ class CoNLLEvaluator(object):
                 subprocess.call(['perl', self.srlEvalScript, goldfile, predictedfile], stdout=file)
             file.close()
 
+    def readScoreFromFile(self, file):
+        """
+        Reads the overall precision, recall and f-measure from file
+        :param file:
+        :return:
+        """
+        try:
+            s = open(file, 'r').read()
+            items =re.findall("Overall.*$",s,re.MULTILINE)[0]
+            items = re.sub( '\s+', ' ', items ).strip().split(' ')
+            items = items[len(items) -3:]
+            res = [float(s) for s in items]
+            return {"officialPrecision":res[0], "officialRecall":res[1], "officialF1":res[2]}
+        except:
+            return {"officialPrecision":0, "officialRecall":0, "officialF1":0}
+
+
 
 if __name__ == '__main__':
     gold = [
@@ -120,7 +138,7 @@ if __name__ == '__main__':
 
     idx2word= {0:'daniel', 1:'e', 2:'muito', 3:'inteligente', 4:'e', 5:'legal', 6:'.'}
 
-    converter = CoNLLEvaluator('../../resources/model-eval.pl', idx2word)
+    converter = CoNLLEvaluator('../../resources/srl-eval.pl', idx2word)
     for i in xrange(0, len(gold)):
         converter.addSentence(gold[i], predicted[i], predicates[i])
 

@@ -75,47 +75,59 @@ class ModelPersistence(object):
 
 class ModelEvaluation(object):
 
-    def __init__(self, numberToKeep=30):
+    def __init__(self):
         self.bestEpoch = None
         self.maxF1 = 0
         self.persistence = ModelPersistence()
-        self.pattern = Config.Instance().resultsDir+'/model_'
-        self.numberToKeep = numberToKeep
-        self.savedFiles = []
+        self.patternRegular = Config.Instance().resultsDir+'/model_'
+        self.patternEpoch = Config.Instance().resultsDir+'/regular_'
+        self.keepBestEpoch = 5
+        self.keepFixedPoint = 3
+        self.savedByBestEpoch = []
+        self.savedForFixedPoint = []
 
 
-    def __getNames(self, epoch):
-        return (self.pattern+str(epoch)+'.json',self.pattern+str(epoch)+'.h5py')
+    def __getNames(self, epoch, epochBased=False):
+        f = self.patternEpoch if epochBased else self.patternRegular
+        return (f+str(epoch)+'.json',f+str(epoch)+'.h5py')
 
-    def __save(self, nn, epoch):
-        modelFile, wFile = self.__getNames(epoch)
+    def __save(self, nn, epoch, epochBased=False):
+        modelFile, wFile = self.__getNames(epoch, epochBased)
         self.persistence.save(nn, modelFile, wFile)
-        self.savedFiles.append((modelFile, wFile))
+        if epochBased:
+            self.savedForFixedPoint.append((modelFile, wFile))
+        else:
+            self.savedByBestEpoch.append((modelFile, wFile))
         print 'Checkpoint saved'
         self.__removeIfNeeded()
 
+    def __remove(self, item):
+        print 'removing {} - {}'.format(item[0], item[1])
+        self.persistence.delete(item[0], item[1])
+        print 'files have been removed'
+
     def __removeIfNeeded(self):
-        if len(self.savedFiles) > self.numberToKeep:
-            item = self.savedFiles.pop(0)
-            print 'removing {} - {}'.format(item[0], item[1])
-            self.persistence.delete(item[0], item[1])
-            print 'files have been removed'
+        if len(self.savedForFixedPoint) > self.keepFixedPoint:
+            self.__remove(self.savedForFixedPoint.pop(0))
+        if len(self.savedByBestEpoch) > self.keepBestEpoch:
+            self.__remove(self.savedByBestEpoch.pop(0))
+
 
 
     def update(self, nn, f1, epoch, fixedCheckPoint=10):
         if f1 > self.maxF1:
             print 'NEW BEST VALUE IN EPOCH {} : {} \nSaving checkpoint...'.format(epoch, f1)
             if self.bestEpoch!=None:
-                modelFile, wFile = self.__getNames(self.bestEpoch)
+                modelFile, wFile = self.__getNames(self.bestEpoch, False)
                 self.persistence.delete(modelFile, wFile)
 
-            self.__save(nn, epoch)
+            self.__save(nn, epoch, False)
 
             self.bestEpoch = epoch
             self.maxF1 = f1
         else:
             if epoch % fixedCheckPoint ==0 and epoch > 0:
                 print 'Fixed checkpoint {}'.format(fixedCheckPoint)
-                self.__save(nn, epoch)
+                self.__save(nn, epoch, True)
             else:
                 print 'Not saving'

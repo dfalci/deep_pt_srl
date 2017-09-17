@@ -29,31 +29,19 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import sys
-import time
-
-import numpy as np
-
 from corpus.corpus_converter import CorpusConverter
 from embeddings.emb_utils import getEmbeddings
 from model.auxiliar.lr_reducer import RateBasedLrReducer
-from model.batcher import Batcher
 from model.configuration import Config
 from model.configuration.model_config import ModelConfig
 from model.evaluation.training_evaluation import Evaluator
 from model.inference import SRLInference
-from model.persistence.model_persistence import ModelEvaluation, ModelPersistence
+from model import LSTMModel
+from model.persistence.model_persistence import ModelEvaluation
 from utils.function_utils import Utils
 from utils.nn_utils import NNUtils
 
 
-def showProgress(currentStep, totalSteps):
-    perc = (float(currentStep)/float(totalSteps)) * 100.0
-    temp = perc/10
-    sys.stdout.write('\r[{0}] {1}% - {2}/{3}'.format('#'*int(temp), (perc), currentStep, totalSteps))
-    sys.stdout.flush()
-
-np.random.seed(4)
 
 print 'loading configuration'
 config = Config.Instance()
@@ -82,12 +70,7 @@ nnUtils.setTagList(tagMap, tagList)
 print 'loaded'
 
 print 'preparing data for training'
-trainingData = data[0]
 testData = data[1]
-
-batcher = Batcher()
-batcher.addAll(trainingData[0], trainingData[1], trainingData[2], trainingData[3])
-container = batcher.getBatches()
 
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
@@ -96,93 +79,18 @@ msaver = ModelEvaluation()
 print 'prepared'
 
 print 'creating neural network model'
-mp = ModelPersistence()
-nn = mp.load(Config.Instance().resultsDir+'/model_50.json', Config.Instance().resultsDir+'/model_50.h5py', )
-nn.compile(optimizer=modelConfig.optimizer, loss=modelConfig.lossFunction, metrics=['accuracy'])
+
+model = LSTMModel(ModelConfig.Instance())
+nn = model.load(Config.Instance().resultsDir+'/model_13.json', Config.Instance().resultsDir+'/model_13.h5py')
 nn.summary()
-lrReducer.setNetwork(nn)
 print 'model loaded'
 
+epoch = 13
+print 'official evaluation on {}'.format(epoch)
+evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch), config.resourceDir+'/srl-eval.pl')
+evaluation = evaluator.evaluate()
 
-print 'start training'
-
-number_of_epochs = ModelConfig.Instance().trainingEpochs
-for epoch in xrange(50, 50+number_of_epochs):
-    print "--------- Epoch %d -----------" % (epoch+1)
-    start_time = time.time()
-    numIterations = len(container)
-
-    indexes = np.arange(len(container))
-    #np.random.shuffle(indexes)
-
-    print indexes
-
-    print 'Running in {} batches'.format(numIterations)
-    for i in xrange(0, numIterations):
-        z = indexes[i]
-
-        sent, pred, aux, label = batcher.open(container[z])
-        showProgress(i, numIterations)
-        nn.fit([sent, pred, aux], label)
-
-    showProgress(numIterations, numIterations)
-    print '\n'
-    print 'end of epoch in  {}... evaluating'.format((time.time() - start_time))
-    start_time = time.time()
-    evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch+1), config.resourceDir+'/srl-eval.pl')
-    evaluation = evaluator.evaluate()
-    f1 = evaluation["tokenMacroF1"]
-    print 'F1-SCORE : {}'.format(f1)
-    lrReducer.onEpochEnd(f1, epoch+1)
-    print "%.2f sec for evaluation" % (time.time() - start_time)
-
-    print "saving checkpoint if needed"
-    msaver.update(nn, f1, epoch+1)
-
-
-print 'ended training'
+print 'done'
 
 
 
-
-
-print 'creating neural network model'
-
-#model = LSTMModel(ModelConfig.Instance())
-mp = ModelPersistence()
-nn = mp.load(Config.Instance().resourceDir+'/model_1.json', Config.Instance().resourceDir+'/model_1.h5py', )
-nn.summary()
-
-print 'model loaded'
-
-
-print 'start training'
-
-number_of_epochs = 2
-for epoch in xrange(number_of_epochs):
-    print "--------- Epoch %d -----------" % (epoch+1)
-    start_time = time.time()
-    numIterations = len(container)
-    print 'Running in {} batches'.format(numIterations)
-    for i in xrange(0, numIterations):
-        sent, pred, aux, label = batcher.open(container[i])
-        showProgress(i, numIterations)
-        nn.fit([sent, pred, aux], label)
-        if i > 10:
-            break
-
-    showProgress(numIterations, numIterations)
-    print '\n'
-    print 'end of epoch in  {}... evaluating'.format((time.time() - start_time))
-    start_time = time.time()
-    evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch), config.resourceDir+'/model-eval.pl')
-    evaluation = evaluator.evaluate()
-    f1 = evaluation["macroF1"]
-    lrReducer.onEpochEnd(nn, f1)
-    print "%.2f sec for evaluation" % (time.time() - start_time)
-
-    print "saving checkpoint if needed"
-    msaver.update(nn, f1, epoch)
-
-
-print 'ended training'
