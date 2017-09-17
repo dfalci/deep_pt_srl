@@ -42,13 +42,24 @@ def downloadData(config):
     :return:
     """
     files = (
-        (config.embeddingsDir+'/model.vec', 'https://www.dropbox.com/s/rjz42q1gjqbjyau/model.vec?dl=0'),
-        (config.embeddingsDir+'/model.vec.syn1neg.npy', 'https://www.dropbox.com/s/hjr6otaeshnozxj/model.vec.syn1neg.npy?dl=0'),
-        (config.embeddingsDir+'/model.vec.wv.syn0.npy', 'https://www.dropbox.com/s/pmu7m82o5soref5/model.vec.wv.syn0.npy?dl=0'),
-        (config.convertedCorpusDir+'/propbank_full.csv'),
-        (config.convertedCorpusDir+'/propbank_test.csv'),
-        (config.convertedCorpusDir+'/propbank_train.csv'),
-        (config.resourceDir+'feature_file.npy')
+        (config.embeddingsDir+'/model.vec', 'https://www.dropbox.com/s/825rx66x2hftiil/model.vec?dl=0'),
+        (config.embeddingsDir+'/model.vec.syn1neg.npy', 'https://www.dropbox.com/s/s7gx06xxcu2ewgv/model.vec.syn1neg.npy?dl=0'),
+        (config.embeddingsDir+'/model.vec.wv.syn0.npy', 'https://www.dropbox.com/s/dwu790boj8s870w/model.vec.wv.syn0.npy?dl=0'),
+        (config.embeddingsDir+'/vocabulary.json', 'https://www.dropbox.com/s/sy8r04v57yz38yq/vocabulary.json?dl=0'),
+        (config.embeddingsDir+'/wordEmbeddings.npy', 'https://www.dropbox.com/s/qy3t832mcem202q/wordEmbeddings.npy?dl=0'),
+        (config.embeddingsDir+'/sent_hybrid.json', 'https://www.dropbox.com/s/7oevekbmikmav41/sent_hybrid.json?dl=0'),
+        (config.embeddingsDir+'/sent_hybrid.npy', 'https://www.dropbox.com/s/3bm1e7wp3klunqb/sent_hybrid.npy?dl=0'),
+        (config.embeddingsDir+'/pred_hybrid.json', 'https://www.dropbox.com/s/s505ab48vufjpo2/pred_hybrid.json?dl=0'),
+        (config.embeddingsDir+'/pred_hybrid.npy', 'https://www.dropbox.com/s/1zbm8k47lqrjkxi/pred_hybrid.npy?dl=0'),
+
+        (config.convertedCorpusDir+'/propbank_full.csv', 'https://www.dropbox.com/s/ac8og8tef9zal9x/propbank_full.csv?dl=0'),
+        (config.convertedCorpusDir+'/propbank_test.csv', 'https://www.dropbox.com/s/e4gzfofarfeggwp/propbank_test.csv?dl=0'),
+        (config.convertedCorpusDir+'/propbank_train.csv', 'https://www.dropbox.com/s/0g0kela0ggiwmwr/propbank_training.csv?dl=0'),
+        (config.convertedCorpusDir+'/wiki.csv', 'https://www.dropbox.com/s/813n7v6fzjh700j/wiki.csv?dl=0'),
+        (config.resourceDir+'/feature_file.npy', 'https://www.dropbox.com/s/h7755you89nl34x/feature_file.npy?dl=0'),
+        (config.resourceDir+'/wiki_00.bz2', 'https://www.dropbox.com/s/poxln5en8nz6wj9/wiki_00.bz2?dl=0')
+
+
     )
     for item in files:
         getFile(item[0], item[1])
