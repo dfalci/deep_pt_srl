@@ -53,7 +53,7 @@ def showProgress(currentStep, totalSteps):
     sys.stdout.write('\r[{0}] {1}% - {2}/{3}'.format('#'*int(temp), (perc), currentStep, totalSteps))
     sys.stdout.flush()
 
-np.random.seed(13)
+np.random.seed(4)
 
 print 'loading configuration'
 config = Config.Instance()
@@ -112,7 +112,7 @@ for epoch in xrange(number_of_epochs):
     numIterations = len(container)
 
     indexes = np.arange(len(container))
-    np.random.shuffle(indexes)
+    #np.random.shuffle(indexes)
 
     print indexes
 
