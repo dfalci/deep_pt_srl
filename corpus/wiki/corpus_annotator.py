@@ -41,7 +41,9 @@ from model.persistence.model_persistence import ModelEvaluation
 from utils.function_utils import Utils
 from utils.nn_utils import NNUtils
 
-
+"""
+This script is responsible for loading the data from wiki.csv file, annotating it with semantic roles inferred with a given trained model.
+"""
 
 print 'loading configuration'
 config = Config.Instance()
@@ -68,9 +70,6 @@ tagMap = converter.tagMap
 tagList = converter.tagList
 nnUtils.setTagList(tagMap, tagList)
 print 'loaded'
-
-print 'preparing data for training'
-testData = data[1]
 
 inference = SRLInference(tagMap, tagList)
 

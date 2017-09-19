@@ -32,6 +32,8 @@ import sys
 import time
 
 import numpy as np
+#set the seed for reproductability
+np.random.seed(13)
 
 from corpus.corpus_converter import CorpusConverter
 from embeddings.emb_utils import getEmbeddings
@@ -47,13 +49,12 @@ from utils.function_utils import Utils
 from utils.nn_utils import NNUtils
 
 
-def showProgress(currentStep, totalSteps):
+def showProgress(currentStep, totalSteps, epoch):
     perc = (float(currentStep)/float(totalSteps)) * 100.0
     temp = perc/10
-    sys.stdout.write('\r[{0}] {1}% - {2}/{3}'.format('#'*int(temp), (perc), currentStep, totalSteps))
+    sys.stdout.write('\r[{0}] {1}% - {2}/{3} - Epoch {4}'.format('#'*int(temp), (perc), currentStep, totalSteps, epoch))
     sys.stdout.flush()
 
-np.random.seed(4)
 
 print 'loading configuration'
 config = Config.Instance()
@@ -106,14 +107,14 @@ print 'model loaded'
 print 'start training'
 
 number_of_epochs = ModelConfig.Instance().trainingEpochs
-for epoch in xrange(number_of_epochs):
-    print "--------- Epoch %d -----------" % (epoch+1)
+for epoch in xrange(1, number_of_epochs):
+    print "--------- Epoch %d -----------" % (epoch)
     start_time = time.time()
     numIterations = len(container)
 
+    print 'shuffling training data'
     indexes = np.arange(len(container))
-    #np.random.shuffle(indexes)
-
+    np.random.shuffle(indexes)
     print indexes
 
     print 'Running in {} batches'.format(numIterations)
@@ -121,15 +122,14 @@ for epoch in xrange(number_of_epochs):
         z = indexes[i]
 
         sent, pred, aux, label = batcher.open(container[z])
-        showProgress(i, numIterations)
-        nn.fit([sent, pred, aux], label)
+        showProgress(i, numIterations, epoch)
+        nn.fit([sent, pred, aux], label, shuffle=False, verbose=0)
 
-    showProgress(numIterations, numIterations)
-    print '\n'
-    print 'end of epoch in  {}... evaluating'.format((time.time() - start_time))
+    showProgress(numIterations, numIterations, epoch)
+    print '\n end of epoch in  {}... evaluating'.format((time.time() - start_time))
     start_time = time.time()
 
-    evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch+1), config.resourceDir+'/srl-eval.pl')
+    evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch), config.resourceDir+'/srl-eval.pl')
     evaluation = evaluator.evaluate()
 
     tokenf1 = evaluation["tokenMacroF1"]
@@ -139,12 +139,12 @@ for epoch in xrange(number_of_epochs):
     print 'TOKEN F1-SCORE : {}'.format(tokenf1)
     print 'OFFICIAL F1-SCORE : {}'.format(officialf1)
 
-    lrReducer.onEpochEnd(tokenf1, epoch+1)
+    lrReducer.onEpochEnd(officialf1, epoch)
 
     print "%.2f sec for evaluation" % (time.time() - start_time)
 
     print "saving checkpoint if needed"
-    msaver.update(nn, officialf1, epoch+1)
+    msaver.update(nn, officialf1, epoch)
 
 
 print 'ended training'

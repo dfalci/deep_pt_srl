@@ -90,4 +90,3 @@ class LSTMModel(object):
         nn.compile(optimizer=self.config.optimizer, loss=self.config.lossFunction, metrics=['accuracy'])
         return nn
 
-
