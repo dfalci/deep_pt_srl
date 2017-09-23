@@ -1,1 +1,1 @@
-from .corpus_creator import CorpusCreator
+from .wiki_creator import CorpusCreator
