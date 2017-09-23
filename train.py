@@ -33,7 +33,7 @@ import time
 
 import numpy as np
 #set the seed for reproductability
-np.random.seed(13)
+np.random.seed(4)
 
 from corpus.corpus_converter import CorpusConverter
 from embeddings.emb_utils import getEmbeddings
@@ -98,6 +98,7 @@ print 'prepared'
 
 print 'creating neural network model'
 model = LSTMModel(ModelConfig.Instance())
+print 'sentenceLoader shape {}'.format(sentenceLoader.weights.shape)
 nn = model.create(sentenceLoader.weights, predicateLoader.weights)
 nn.summary()
 lrReducer.setNetwork(nn)
