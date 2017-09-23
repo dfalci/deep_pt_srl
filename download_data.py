@@ -5,4 +5,6 @@ print 'loading configuration'
 config = Config.Instance()
 config.prepare(Utils.getWorkingDirectory())
 
+print 'downloading files'
 downloadData(config)
+print 'done'

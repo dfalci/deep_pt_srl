@@ -68,6 +68,9 @@ print 'configuration loaded'
 
 print 'loading word embeddings {}'.format(modelConfig.embeddingType)
 sentenceLoader, predicateLoader = getEmbeddings(config, modelConfig.embeddingType)
+
+print 'sentenceLoader shape {}'.format(sentenceLoader.weights.shape)
+
 nnUtils = NNUtils.Instance()
 nnUtils.setWordUtils(sentenceLoader.word2idx, sentenceLoader.idx2word)
 print 'loaded'
@@ -98,7 +101,6 @@ print 'prepared'
 
 print 'creating neural network model'
 model = LSTMModel(ModelConfig.Instance())
-print 'sentenceLoader shape {}'.format(sentenceLoader.weights.shape)
 nn = model.create(sentenceLoader.weights, predicateLoader.weights)
 nn.summary()
 lrReducer.setNetwork(nn)

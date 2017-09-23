@@ -36,6 +36,7 @@ from model.configuration import Config
 from model.configuration.model_config import ModelConfig
 from model.evaluation.training_evaluation import Evaluator
 from model.inference import SRLInference
+from model.inference import Predictor
 from model import LSTMModel
 from model.persistence.model_persistence import ModelEvaluation
 from utils.function_utils import Utils
@@ -74,7 +75,7 @@ print 'loaded'
 
 inference = SRLInference(tagMap, tagList)
 
-evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
+#evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
 
 lrReducer = RateBasedLrReducer(modelConfig.trainingEpochs)
 msaver = ModelEvaluation()
@@ -82,14 +83,13 @@ print 'prepared'
 
 print 'loading neural network model'
 model = LSTMModel(ModelConfig.Instance())
-nn = model.load(Config.Instance().resultsDir+'/finalModel.json', Config.Instance().resultsDir+'/finalModel.h5py')
+nn = model.load(Config.Instance().resultsDir+'/wikiModel.json', Config.Instance().resultsDir+'/wikiModel.h5py')
 nn.summary()
 print 'model loaded'
 
-print 'evaluating...'
-evaluator.prepare(nn, config.resultsDir+'/official', config.resourceDir+'/srl-eval.pl')
-evaluation = evaluator.evaluate()
-print 'done'
+prediction = Predictor(nn, tagList, inference)
+
+
 
 
 

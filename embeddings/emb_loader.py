@@ -112,16 +112,18 @@ class HybridModel(Embedding):
         self.word2idx={}
         if originalWord2idx != None:
             dimensions = originalWeights.shape[1]
-            self.weights = np.ndarray(shape=(0, dimensions), dtype=float)
+            self.weights = np.zeros((len(tokens), dimensions), dtype=float)
 
         currIdx = 0
         for t in tokens:
             self.word2idx[t] = currIdx
             try:
                 originalIdx = originalWord2idx[t]
-                self.weights = np.vstack((self.weights, originalWeights[originalIdx]))
+                #self.weights[currIdx] = np.vstack((self.weights, originalWeights[originalIdx]))
+                self.weights[currIdx] = originalWeights[originalIdx]
             except:
-                self.weights = np.vstack((self.weights, np.random.rand(1, dimensions)))
+                #self.weights = np.vstack((self.weights, np.random.rand(1, dimensions)))
+                self.weights[currIdx] = np.random.rand(1, dimensions)
                 unkCount+=1
                 unkWords.append(t)
             currIdx+=1

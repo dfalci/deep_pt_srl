@@ -30,6 +30,7 @@
 
 from batcher import Batcher
 from inference import SRLInference
+from inference import Predictor
 from lstm_model import LSTMModel
 from model.auxiliar.lr_reducer import LrReducer
 from model.evaluation.conll_evaluator import CoNLLEvaluator

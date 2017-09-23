@@ -6,6 +6,10 @@ from corpus import CorpusCreator
 from utils import Utils, extractAllTokens
 from embeddings import W2VModel, EmbeddingLoader
 
+"""
+This file is responsible for creating the expanded corpus from wikipedia sentences.
+"""
+
 
 seed = 27
 np.random.seed(seed)
