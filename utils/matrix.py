@@ -1,15 +1,28 @@
 
+from model.configuration import Config
+from model.configuration.model_config import ModelConfig
+from utils.function_utils import Utils
+from utils import extractFeaturesFromSentence, toNNFormat
+from embeddings import getEmbeddings
+import pandas as pd
 
-import numpy as np
+print 'loading configuration'
+config = Config.Instance()
+config.prepare(Utils.getWorkingDirectory())
 
+modelConfig = ModelConfig.Instance()
+modelConfig.prepare(config.srlConfig+'/srl-config.json')
+print 'configuration loaded'
 
-temp = np.zeros((73100, 150))
+sentenceLoader, predicateLoader = getEmbeddings(config, modelConfig.embeddingType)
 
-n = np.ones((1, 150))
+wikiFile = pd.read_csv(config.convertedCorpusDir+'/wiki.csv')
 
-print temp[0]
+for i in xrange(0, len(wikiFile)):
+    predicate = wikiFile['predicate'][i]
+    sentence = wikiFile['sentence'][i]
+    convertedSentence, convertedPredicate, allCaps, firstCaps, noCaps, context, distance = extractFeaturesFromSentence(sentence, predicate, sentenceLoader.word2idx, predicateLoader.word2idx)
+    inputSentence, inputPredicate, inputAux = toNNFormat(convertedSentence, convertedPredicate, allCaps, firstCaps, noCaps, context, distance)
 
-temp[0] = n
-print temp[0]
-
-print temp.shape
+    print inputSentence.shape, inputPredicate.shape, inputAux.shape
+    break

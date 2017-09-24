@@ -31,21 +31,39 @@
 
 from corpus.corpus_converter import CorpusConverter
 from embeddings.emb_utils import getEmbeddings
-from model.auxiliar.lr_reducer import RateBasedLrReducer
 from model.configuration import Config
 from model.configuration.model_config import ModelConfig
-from model.evaluation.training_evaluation import Evaluator
 from model.inference import SRLInference
 from model.inference import Predictor
 from model import LSTMModel
-from model.persistence.model_persistence import ModelEvaluation
 from utils.function_utils import Utils
 from utils.nn_utils import NNUtils
-from utils import extractFeaturesFromSentence
+from utils import extractFeaturesFromSentence, toNNFormat
+import pandas as pd
+import unicodecsv as csv
+import sys
+
 
 """
 This script is responsible for loading the data from wiki.csv file, annotating it with semantic roles inferred with a given trained model.
 """
+
+def showProgress(currentStep, totalSteps, length):
+    sys.stdout.write('\r{0} of {1} - {2}'.format(currentStep, totalSteps, length))
+    sys.stdout.flush()
+
+def checkVerb(roles, distance):
+    i = 0
+    for d in distance:
+        if d == 0:
+            return roles[i] == u'V'
+        i +=1
+
+def formatItems(items):
+    ret = ''
+    for i in items:
+        ret += str(i)+ ' '
+    return ret.encode('utf-8').strip()
 
 print 'loading configuration'
 config = Config.Instance()
@@ -67,27 +85,51 @@ print 'loaded'
 print 'loading corpus'
 csvFiles = [config.convertedCorpusDir+'/propbank_training.csv', config.convertedCorpusDir+'/propbank_test.csv']
 converter = CorpusConverter(csvFiles, sentenceLoader, predicateLoader)
-data = converter.load(config.resourceDir+'/feature_file.npy')
+data = converter.load(config.resourceDir+'/wiki_feature_file.npy')
 tagMap = converter.tagMap
 tagList = converter.tagList
 nnUtils.setTagList(tagMap, tagList)
 print 'loaded'
 
-inference = SRLInference(tagMap, tagList)
-
-#evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
-
-lrReducer = RateBasedLrReducer(modelConfig.trainingEpochs)
-msaver = ModelEvaluation()
-print 'prepared'
 
 print 'loading neural network model'
+inference = SRLInference(tagMap, tagList)
 model = LSTMModel(ModelConfig.Instance())
-nn = model.load(Config.Instance().resultsDir+'/wikiModel.json', Config.Instance().resultsDir+'/wikiModel.h5py')
+nn = model.load(Config.Instance().resultsDir+'/best/wiki_model.json', Config.Instance().resultsDir+'/best/wiki_model.h5py')
 nn.summary()
 print 'model loaded'
 
 prediction = Predictor(nn, tagList, inference)
+
+
+wikiFile = pd.read_csv(config.convertedCorpusDir+'/wiki.csv')
+
+results = []
+iterations = len(wikiFile)
+for i in xrange(0, iterations):
+    try:
+        propositionId = wikiFile['propositionId'][i]
+        predicate = wikiFile['predicate'][i]
+        sentence = wikiFile['sentence'][i]
+        convertedSentence, convertedPredicate, allCaps, firstCaps, noCaps, context, distance = extractFeaturesFromSentence(sentence, predicate, sentenceLoader.word2idx, predicateLoader.word2idx)
+        inputSentence, inputPredicate, inputAux = toNNFormat(convertedSentence, convertedPredicate, allCaps, firstCaps, noCaps, context, distance)
+
+        roles = prediction.predict(inputSentence, inputPredicate, inputAux)
+
+        if checkVerb(roles, distance):
+            results.append((propositionId,predicate,sentence,formatItems(roles),formatItems(allCaps),formatItems(firstCaps),formatItems(noCaps),formatItems(distance),formatItems(context)))
+        showProgress(i, iterations, len(results))
+    except:
+        print 'error in line {}'.format(i)
+
+
+
+with open(config.convertedCorpusDir+'/semi_sup_wiki.csv', 'w') as f:
+    writer = csv.writer(f, encoding='utf-8')
+    writer.writerow(['propositionId', 'predicate', 'sentence', 'roles', 'allCapitalized', 'firstCapitalized', 'noCapitalized', 'distance', 'predicateContext'])
+    for p in results:
+        writer.writerow(p)
+f.close()
 
 
 

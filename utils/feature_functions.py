@@ -28,6 +28,9 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from token_regex import parseCSVLine
+import numpy as np
+
 
 def extractCaps(sentence):
     tokens = sentence.split(' ')
@@ -51,7 +54,7 @@ def extractTokenPositions(sentence, predicate):
     tokens = sentence.split(' ')
     predicateIndex = -1
     for i in xrange(0, len(tokens)):
-        if tokens[i] == predicate:
+        if tokens[i].lower() == predicate:
             predicateIndex = i
             break
 
@@ -68,7 +71,7 @@ def extractTokenPositions(sentence, predicate):
 
 def translateToken(token, word2idx, defaultToken = None):
     try:
-        return word2idx[token]
+        return word2idx[token.lower()]
     except:
         if defaultToken != None:
             return defaultToken
@@ -88,8 +91,7 @@ def translateSentence(sentence, word2idx, defaultToken = None):
     translation = [translateToken(t,word2idx) for t in tokens]
     return translation
 
-
-def extractFeaturesFromSentence(sentence, predicate, word2idx, unkToken=None, unkPred=None):
+def extractFeaturesFromSentence(sentence, predicate, word2idx, predWord2idx, unkToken=None, unkPred=None):
     """
     Given a sentence, its predicate and the word2idx dictionary returns the indexes
     :param sentence:
@@ -99,15 +101,22 @@ def extractFeaturesFromSentence(sentence, predicate, word2idx, unkToken=None, un
     """
     allCaps, firstCaps, noCaps = extractCaps(sentence)
     distance, context = extractTokenPositions(sentence, predicate)
-    convertedSentence = translateSentence(sentence, word2idx)
-    convertedPredicate = translatePredicates(sentence, predicate, word2idx)
+    s = parseCSVLine(sentence, correctToken=False)
+    p = parseCSVLine(predicate, correctToken=False)
+
+    assert len(sentence.split(' ')) == len(sentence.split(' '))
+    convertedSentence = translateSentence(s, word2idx)
+    convertedPredicate = translatePredicates(s, p, predWord2idx)
     return convertedSentence, convertedPredicate, allCaps, firstCaps, noCaps, context, distance
 
-
-
+def toNNFormat(convertedSentence, convertedPredicate, allCaps, firstCaps, noCaps, context, distance):
+    ret =[]
+    for i in xrange(0, len(allCaps)):
+        ret.append(np.array([allCaps[i], firstCaps[i], noCaps[i], context[i], distance[i]]))
+    return np.array(convertedSentence)[np.newaxis, :], np.array(convertedPredicate)[np.newaxis, :], np.array(ret)[np.newaxis, :]
 
 if __name__ == '__main__':
     sentence = u'Este e e e mais um pequeno teste : FUMEC'
     predicate = u'mais'
-    word2idx = { u'Este':0, u'e':1, u'mais':2, u'um':3, u'pequeno':4, u'teste':5, u':':6, u'FUMEC':7}
-    print extractFeaturesFromSentence(sentence, predicate, word2idx)
+    word2idx = { u'este':0, u'e':1, u'mais':2, u'um':3, u'pequeno':4, u'teste':5, u':':6, u'fumec':7}
+    print extractFeaturesFromSentence(sentence, predicate, word2idx, word2idx)

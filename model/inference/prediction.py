@@ -9,12 +9,12 @@ class Predictor(object):
     def __init__(self, nn, tagList, globalInference=None):
         self.nn = nn
         self.tagList = tagList
-        self.globalInferece = globalInference
+        self.globalInference = globalInference
 
 
     def predict(self, sent, pred, aux):
         y = self.nn.predict([sent, pred, aux])
-        if self.globalInferece != None:
+        if self.globalInference != None:
             y, tags = self.globalInference.predict(y[0])
         y = np.argmax(y, axis=1)
         return ConverterUtils.fromIndexToRoles(y, self.tagList)

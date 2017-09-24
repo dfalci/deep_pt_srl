@@ -45,7 +45,7 @@ def extractAllTokens(csvFile, columnName='sentence'):
     return items
 
 
-def parseCSVLine(line, toLower=True, numberTransform='#', removeAccents=True, strip=True):
+def parseCSVLine(line, toLower=True, numberTransform='#', removeAccents=True, strip=True, correctToken=True):
     """
     This method is designed to be executed after the processing and may not remove tokens, but just transform them
     :param line:
@@ -63,9 +63,13 @@ def parseCSVLine(line, toLower=True, numberTransform='#', removeAccents=True, st
     line = re.sub(r'\d+(\d)*(\.\d+)*(\,\d+)?', numberTransform, line)
 
     if strip:
-        return correct(line.strip())
-
-    return correct(line)
+        if correctToken:
+            return correct(line.strip())
+        else:
+            return line.strip()
+    if correctToken:
+        return correct(line)
+    return line
 
 def correct(line):
     # substituir estes camaradas abaixo por uma expressão regular
