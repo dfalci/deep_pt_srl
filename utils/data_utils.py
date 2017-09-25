@@ -54,10 +54,16 @@ def downloadData(config):
 
         (config.convertedCorpusDir+'/propbank_full.csv', 'https://dl.dropboxusercontent.com/s/ac8og8tef9zal9x/propbank_full.csv?dl=0'),
         (config.convertedCorpusDir+'/propbank_test.csv', 'https://dl.dropboxusercontent.com/s/e4gzfofarfeggwp/propbank_test.csv?dl=0'),
-        (config.convertedCorpusDir+'/propbank_train.csv', 'https://dl.dropboxusercontent.com/s/0g0kela0ggiwmwr/propbank_training.csv?dl=0'),
+        (config.convertedCorpusDir+'/propbank_training.csv', 'https://dl.dropboxusercontent.com/s/0g0kela0ggiwmwr/propbank_training.csv?dl=0'),
         (config.convertedCorpusDir+'/wiki.csv', 'https://dl.dropboxusercontent.com/s/813n7v6fzjh700j/wiki.csv?dl=0'),
+        (config.convertedCorpusDir+'/semi_sup_wiki.csv', 'https://dl.dropboxusercontent.com/s/ca0udhilr5qxhw1/semi_sup_wiki.csv?dl=0'),
+
         (config.resourceDir+'/feature_file.npy', 'https://dl.dropboxusercontent.com/s/h7755you89nl34x/feature_file.npy?dl=0'),
-        (config.resourceDir+'/wiki_00.bz2', 'https://dl.dropboxusercontent.com/s/poxln5en8nz6wj9/wiki_00.bz2?dl=0')
+        (config.resourceDir+'/wiki_feature_file.npy', 'https://dl.dropboxusercontent.com/s/z3n8c08weff3mio/wiki_feature_file.npy?dl=0'),
+        (config.resourceDir+'/wiki_00.bz2', 'https://dl.dropboxusercontent.com/s/poxln5en8nz6wj9/wiki_00.bz2?dl=0'),
+
+
+
 
 
     )
