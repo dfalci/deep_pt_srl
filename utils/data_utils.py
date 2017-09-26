@@ -57,6 +57,8 @@ def downloadData(config):
         (config.convertedCorpusDir+'/propbank_training.csv', 'https://dl.dropboxusercontent.com/s/0g0kela0ggiwmwr/propbank_training.csv?dl=0'),
         (config.convertedCorpusDir+'/wiki.csv', 'https://dl.dropboxusercontent.com/s/813n7v6fzjh700j/wiki.csv?dl=0'),
         (config.convertedCorpusDir+'/semi_sup_wiki.csv', 'https://dl.dropboxusercontent.com/s/ca0udhilr5qxhw1/semi_sup_wiki.csv?dl=0'),
+        (config.convertedCorpusDir+'/semi_sup_wiki_auxiliary_only.csv', 'https://dl.dropboxusercontent.com/s/6pv6du6ud1ea93k/semi_sup_wiki_auxiliary_only.csv?dl=0'),
+
 
         (config.resourceDir+'/feature_file.npy', 'https://dl.dropboxusercontent.com/s/h7755you89nl34x/feature_file.npy?dl=0'),
         (config.resourceDir+'/wiki_feature_file.npy', 'https://dl.dropboxusercontent.com/s/z3n8c08weff3mio/wiki_feature_file.npy?dl=0'),

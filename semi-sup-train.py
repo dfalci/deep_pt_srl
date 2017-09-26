@@ -79,10 +79,10 @@ print 'loaded'
 
 
 print 'loading corpus'
-csvFiles = [config.convertedCorpusDir+'/semi_sup_wiki.csv', config.convertedCorpusDir+'/propbank_test.csv']
+csvFiles = [config.convertedCorpusDir+'/semi_sup_wiki_auxiliary_only.csv', config.convertedCorpusDir+'/propbank_test.csv']
 converter = CorpusConverter(csvFiles, sentenceLoader, predicateLoader)
-converter.convertAndSave(config.resourceDir+'/semi_sup_feature_file')
-data = converter.load(config.resourceDir+'/semi_sup_feature_file.npy')
+converter.convertAndSave(config.resourceDir+'/semi_sup_feature_file_only')
+data = converter.load(config.resourceDir+'/semi_sup_feature_file_only.npy')
 tagMap = converter.tagMap
 tagList = converter.tagList
 nnUtils.setTagList(tagMap, tagList)
