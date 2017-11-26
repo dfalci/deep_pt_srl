@@ -235,6 +235,9 @@ class CorpusConverter(object):
 if __name__ == '__main__':
 
     from embeddings.emb_loader import W2VModel
+    from utils.config_loader import readConfig
+
+    readConfig()
 
     options = {
         "npzFile":"../../resources/embeddings/wordEmbeddings.npy",
