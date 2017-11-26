@@ -231,6 +231,7 @@ class EmbeddingLoader(object):
         :return:
         """
         dimensions = ModelConfig.Instance().embeddingSize
+        print 'processing embeddings : {}'.format(dimensions)
         self.model.prepare()
         self.word2idx = self.model.getVocabulary()
         self.weights = self.model.getWeights()
