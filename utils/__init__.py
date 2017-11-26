@@ -36,3 +36,4 @@ from .function_utils import Utils
 from .nn_utils import NNUtils
 from .data_utils import getFile, downloadData
 from .feature_functions import extractFeaturesFromSentence, toNNFormat
+from .config_loader import readConfig
