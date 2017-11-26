@@ -78,7 +78,10 @@ class Evaluator(object):
     def evaluate(self):
         for sent, pred, aux, role in zip(self.testData[0], self.testData[1], self.testData[2], self.testData[3]):
             y = self.nn.predict([sent, pred, aux])
-            y, tags = self.globalInference.predict(y[0])
+            if self.globalInference!=None:
+                y, tags = self.globalInference.predict(y[0])
+            else:
+                y = y[0]
 
             y = np.argmax(y, axis=1)
             golden = np.argmax(role[0], axis=1)
