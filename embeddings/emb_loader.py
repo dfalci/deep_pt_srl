@@ -32,6 +32,8 @@ import numpy as np
 from gensim.models import Word2Vec
 from os.path import isfile
 import json
+from model.configuration.model_config import ModelConfig
+from utils.config_loader import readConfig
 
 class Embedding(object):
 
@@ -155,7 +157,7 @@ class W2VModel(Embedding):
         self.vecFile = options["vecFile"]
         self.resourcesReady = True
 
-    def __processFile(self, addUNK=True, dimensions=150):
+    def __processFile(self, addUNK=True):
         """
         The .vec file is the input and the npz file without the extension
         :param inputFile:
@@ -163,6 +165,7 @@ class W2VModel(Embedding):
         :return:
         """
         assert self.resourcesReady
+        dimensions = ModelConfig.Instance().embeddingSize
         wikiModel = Word2Vec.load(self.vecFile)
         weightMatrix = wikiModel.wv.syn0
 
@@ -221,13 +224,13 @@ class EmbeddingLoader(object):
     def __init__(self, model):
         self.model = model
 
-    def process(self, addPadding=True, dimensions=150):
+    def process(self, addPadding=True):
         """
         Loads the embedding model. If necessary adds a padding member (array with zeros) at the end
         :param addPadding:
-        :param dimensions:
         :return:
         """
+        dimensions = ModelConfig.Instance().embeddingSize
         self.model.prepare()
         self.word2idx = self.model.getVocabulary()
         self.weights = self.model.getWeights()
@@ -248,6 +251,7 @@ class EmbeddingLoader(object):
 
 
 if __name__ == '__main__':
+    readConfig()
     options = {
         "npzFile":"../resources/embeddings/wordEmbeddings.npy",
         "npzModel":"../resources/embeddings/wordEmbeddings",
