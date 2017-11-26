@@ -1,9 +1,8 @@
-from utils import Utils, downloadData
-from model.configuration import Config
+from utils import downloadData
+from utils.config_loader import readConfig
 
 print 'loading configuration'
-config = Config.Instance()
-config.prepare(Utils.getWorkingDirectory())
+config, modelConfig = readConfig()
 
 print 'downloading files'
 downloadData(config)

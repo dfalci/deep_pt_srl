@@ -42,6 +42,7 @@ from utils import extractFeaturesFromSentence, toNNFormat
 import pandas as pd
 import unicodecsv as csv
 import sys
+from utils.config_loader import readConfig
 
 
 """
@@ -66,11 +67,7 @@ def formatItems(items):
     return ret.encode('utf-8').strip()
 
 print 'loading configuration'
-config = Config.Instance()
-config.prepare(Utils.getWorkingDirectory())
-
-modelConfig = ModelConfig.Instance()
-modelConfig.prepare(config.srlConfig+'/srl-config.json')
+config, modelConfig = readConfig()
 print 'configuration loaded'
 
 

@@ -45,6 +45,7 @@ from model.inference import SRLInference
 from model.persistence.model_persistence import ModelEvaluation, ModelPersistence
 from utils.function_utils import Utils
 from utils.nn_utils import NNUtils
+from utils.config_loader import readConfig
 
 
 def showProgress(currentStep, totalSteps):
@@ -56,16 +57,12 @@ def showProgress(currentStep, totalSteps):
 np.random.seed(4)
 
 print 'loading configuration'
-config = Config.Instance()
-config.prepare(Utils.getWorkingDirectory())
-
-modelConfig = ModelConfig.Instance()
-modelConfig.prepare(config.srlConfig+'/srl-config.json')
+config, modelConfig = readConfig()
 print 'configuration loaded'
 
 
 
-print 'loading word embeddings {}'.format(modelConfig.embeddingType)
+print 'loading word embeddings : {} - embedding size : {}'.format(modelConfig.embeddingType, modelConfig.embeddingSize)
 sentenceLoader, predicateLoader = getEmbeddings(config, modelConfig.embeddingType)
 nnUtils = NNUtils.Instance()
 nnUtils.setWordUtils(sentenceLoader.word2idx, sentenceLoader.idx2word)

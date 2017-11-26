@@ -39,14 +39,13 @@ from corpus.corpus_converter import CorpusConverter
 from embeddings.emb_utils import getEmbeddings
 from model.auxiliar.lr_reducer import PatienceBaseLrReducer
 from model.batcher import Batcher
-from model.configuration import Config
 from model.configuration.model_config import ModelConfig
 from model.evaluation.training_evaluation import Evaluator
 from model.inference import SRLInference
 from model.lstm_model import LSTMModel
 from model.persistence.model_persistence import ModelEvaluation
-from utils.function_utils import Utils
 from utils.nn_utils import NNUtils
+from utils.config_loader import readConfig
 
 
 def showProgress(currentStep, totalSteps, epoch):
@@ -57,17 +56,13 @@ def showProgress(currentStep, totalSteps, epoch):
 
 
 print 'loading configuration'
-config = Config.Instance()
-config.prepare(Utils.getWorkingDirectory())
-
-modelConfig = ModelConfig.Instance()
-modelConfig.prepare(config.srlConfig+'/srl-config.json')
+config, modelConfig = readConfig()
 print 'configuration loaded'
 
 
 
-print 'loading word embeddings {}'.format(modelConfig.embeddingType)
-sentenceLoader, predicateLoader = getEmbeddings(config, modelConfig.embeddingType)
+print 'loading word embeddings : {} - embedding size : {}'.format(modelConfig.embeddingType, modelConfig.embeddingSize)
+sentenceLoader, predicateLoader = getEmbeddings()
 
 print 'sentenceLoader shape {}'.format(sentenceLoader.weights.shape)
 

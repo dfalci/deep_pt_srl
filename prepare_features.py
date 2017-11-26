@@ -34,20 +34,14 @@ import numpy as np
 from corpus.corpus_converter import CorpusConverter
 from corpus.propbankbr_parser import PropBankParser
 from embeddings.emb_utils import prepareEmbeddings
-from model.configuration import Config
-from model.configuration.model_config import ModelConfig
-from utils.function_utils import Utils
+from utils.config_loader import readConfig
 
 seed = 27
 np.random.seed(seed)
 
 
 print 'loading configuration'
-config = Config.Instance()
-config.prepare(Utils.getWorkingDirectory())
-print 'base directory : {}'.format(config.baseDir)
-modelConfig = ModelConfig.Instance()
-modelConfig.prepare(config.srlConfig+'/srl-config.json')
+config, modelConfig = readConfig()
 print 'configuration loaded'
 
 
