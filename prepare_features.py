@@ -52,7 +52,7 @@ parser.generateFeatures(outputDirectory=config.convertedCorpusDir, partition=(0.
 print 'conversion ready'
 
 print 'preparing the embedding model - {}'.format(modelConfig.embeddingType)
-sentLoader, predLoader = prepareEmbeddings(config, modelConfig.embeddingType)
+sentLoader, predLoader = prepareEmbeddings()
 print 'embedding prepared'
 
 

@@ -1,4 +1,4 @@
-from utils.function_utils import Utils
+from function_utils import Utils
 from model.configuration import Config
 from model.configuration.model_config import ModelConfig
 
