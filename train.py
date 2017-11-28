@@ -37,7 +37,7 @@ np.random.seed(4)
 
 from corpus.corpus_converter import CorpusConverter
 from embeddings.emb_utils import getEmbeddings
-from model.auxiliar.lr_reducer import PatienceBaseLrReducer
+from model.auxiliar.lr_reducer import PatienceBaseLrReducer, CyclicLearningRate
 from model.auxiliar.early_stopper import EarlyStopper
 from model.batcher import Batcher
 from model.configuration.model_config import ModelConfig
@@ -92,6 +92,7 @@ container = batcher.getBatches()
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
 lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs)
+clr = CyclicLearningRate(base_lr=0.001, max_lr=0.006, step_size=1000., mode='triangular2')
 msaver = ModelEvaluation()
 print 'prepared'
 
@@ -123,11 +124,13 @@ for epoch in xrange(1, number_of_epochs):
 
         sent, pred, aux, label = batcher.open(container[z])
         showProgress(i, numIterations, epoch)
-        nn.fit([sent, pred, aux], label, shuffle=False, verbose=0)
+        nn.fit([sent, pred, aux], label, shuffle=False, verbose=0, callbacks=[clr])
 
     showProgress(numIterations, numIterations, epoch)
     print '\n end of epoch in  {}... evaluating'.format((time.time() - start_time))
     start_time = time.time()
+
+    print '\n number of iterations : {}'.format(clr.clr_iterations)
 
     evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch), config.resourceDir+'/srl-eval.pl')
     evaluation = evaluator.evaluate()
@@ -139,7 +142,7 @@ for epoch in xrange(1, number_of_epochs):
     print 'TOKEN F1-SCORE : {}'.format(tokenf1)
     print 'OFFICIAL F1-SCORE : {}'.format(officialf1)
 
-    lrReducer.onEpochEnd(officialf1, epoch)
+    #lrReducer.onEpochEnd(officialf1, epoch)
 
 
     print "%.2f sec for evaluation" % (time.time() - start_time)
