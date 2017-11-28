@@ -16,5 +16,7 @@ class Predictor(object):
         y = self.nn.predict([sent, pred, aux])
         if self.globalInference != None:
             y, tags = self.globalInference.predict(y[0])
+        else:
+            y =y[0]
         y = np.argmax(y, axis=1)
         return ConverterUtils.fromIndexToRoles(y, self.tagList)

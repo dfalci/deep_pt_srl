@@ -47,6 +47,7 @@ from model.lstm_model import LSTMModel
 from model.persistence.model_persistence import ModelEvaluation
 from utils.function_utils import Utils
 from utils.nn_utils import NNUtils
+from utils.config_loader import readConfig
 
 
 def showProgress(currentStep, totalSteps, epoch):
@@ -57,11 +58,7 @@ def showProgress(currentStep, totalSteps, epoch):
 
 
 print 'loading configuration'
-config = Config.Instance()
-config.prepare(Utils.getWorkingDirectory())
-
-modelConfig = ModelConfig.Instance()
-modelConfig.prepare(config.srlConfig+'/srl-config.json')
+config, modelConfig = readConfig()
 print 'configuration loaded'
 
 
@@ -79,10 +76,10 @@ print 'loaded'
 
 
 print 'loading corpus'
-csvFiles = [config.convertedCorpusDir+'/semi_sup_wiki.csv', config.convertedCorpusDir+'/propbank_test.csv']
+csvFiles = [config.convertedCorpusDir+'/semi_sup_wiki_auxiliary_only.csv', config.convertedCorpusDir+'/propbank_test.csv']
 converter = CorpusConverter(csvFiles, sentenceLoader, predicateLoader)
-converter.convertAndSave(config.resourceDir+'/semi_sup_feature_file')
-data = converter.load(config.resourceDir+'/semi_sup_feature_file.npy')
+converter.convertAndSave(config.resourceDir+'/semi_sup_feature_file_only')
+data = converter.load(config.resourceDir+'/semi_sup_feature_file_only.npy')
 tagMap = converter.tagMap
 tagList = converter.tagList
 nnUtils.setTagList(tagMap, tagList)

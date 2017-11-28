@@ -1,7 +1,6 @@
 
 import numpy as np
-from model.configuration import Config
-from model.configuration import ModelConfig
+from utils.config_loader import readConfig
 from corpus import CorpusCreator
 from utils import Utils, extractAllTokens
 from embeddings import W2VModel, EmbeddingLoader
@@ -16,11 +15,7 @@ np.random.seed(seed)
 
 
 print 'loading configuration'
-config = Config.Instance()
-config.prepare(Utils.getWorkingDirectory())
-print 'base directory : {}'.format(config.baseDir)
-modelConfig = ModelConfig.Instance()
-modelConfig.prepare(config.srlConfig+'/srl-config.json')
+config, modelConfig = readConfig()
 print 'configuration loaded'
 
 

@@ -28,12 +28,33 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from .singleton import Singleton
-from .token_regex import parseCSVLine, extractAllTokens, splitTokens
-from .contraction_handler import ContractionHandler
-from .converter_utils import ConverterUtils
-from .function_utils import Utils
-from .nn_utils import NNUtils
-from .data_utils import getFile, downloadData
-from .feature_functions import extractFeaturesFromSentence, toNNFormat
-from .config_loader import readConfig
+from ..configuration.model_config import ModelConfig
+
+class EarlyStopper(object):
+    """
+    decides whether training process should stop
+    """
+
+    def __init__(self):
+        self.patience = ModelConfig.Instance().eaPatience
+        self.useEA = ModelConfig.Instance().useEA
+        self.best = -1
+        self.counter = 0
+        if self.useEA:
+            print 'Early stopper configured with patience {}'.format(self.patience)
+        else:
+            print 'Not using early stopper'
+
+    def shouldStop(self, newValue):
+        if self.useEA == False:
+            return False
+        if newValue >= self.best:
+            self.best = newValue
+            self.counter = 0
+        else:
+            if self.counter >= self.patience:
+                return True
+            self.counter +=1
+        return False
+
+

@@ -15,5 +15,7 @@
   "patience":5,
   "decayRate":0.7,
   "maxReductions":15,
-  "checkpointsToKeep":10
+  "checkpointsToKeep":10,
+  "useEA":true,
+  "eaPatience":1
 }
