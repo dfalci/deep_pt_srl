@@ -92,7 +92,7 @@ container = batcher.getBatches()
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
 lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs)
-clr = CyclicLearningRate(base_lr=0.001, max_lr=0.006, step_size=1000., mode='triangular2')
+clr = CyclicLearningRate(base_lr=0.00020, max_lr=0.0012, step_size=(204.*3), mode='exp_range', gamma=0.99996)
 msaver = ModelEvaluation()
 print 'prepared'
 
@@ -152,6 +152,7 @@ for epoch in xrange(1, number_of_epochs):
 
     if es.shouldStop(officialf1):
         print 'Early stopper decided to quit on epoch {} - best value {}'.format(epoch, es.best)
+        break
 
 
 print 'ended training'
