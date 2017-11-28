@@ -38,6 +38,7 @@ np.random.seed(4)
 from corpus.corpus_converter import CorpusConverter
 from embeddings.emb_utils import getEmbeddings
 from model.auxiliar.lr_reducer import PatienceBaseLrReducer
+from model.auxiliar.early_stopper import EarlyStopper
 from model.batcher import Batcher
 from model.configuration.model_config import ModelConfig
 from model.evaluation.training_evaluation import Evaluator
@@ -99,6 +100,7 @@ model = LSTMModel(ModelConfig.Instance())
 nn = model.create(sentenceLoader.weights, predicateLoader.weights)
 nn.summary()
 lrReducer.setNetwork(nn)
+es = EarlyStopper()
 print 'model loaded'
 
 
@@ -139,10 +141,14 @@ for epoch in xrange(1, number_of_epochs):
 
     lrReducer.onEpochEnd(officialf1, epoch)
 
+
     print "%.2f sec for evaluation" % (time.time() - start_time)
 
     print "saving checkpoint if needed"
     msaver.update(nn, officialf1, epoch)
+
+    if es.shouldStop(officialf1):
+        print 'Early stopper decided to quit on epoch {} - best value {}'.format(epoch, es.best)
 
 
 print 'ended training'
