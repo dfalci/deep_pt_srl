@@ -113,13 +113,14 @@ class FixedBasedLrReducer(LrReducer):
 
 class PatienceBaseLrReducer(LrReducer):
 
-    def __init__(self, trainingEpochs):
+    def __init__(self, trainingEpochs, patience, reduceRate):
         super(PatienceBaseLrReducer, self).__init__(trainingEpochs)
         self.roundsAwaiting = 0
-        self.reduceRate = 0.7
-        self.patience = 3
+        self.reduceRate = reduceRate
+        self.patience = patience
         self.maxReductions = 15
         self.reductions = 0
+        print '{} - {}'.format(self.reduceRate, self.patience)
 
 
     def onEpochEnd(self, f1, epoch):

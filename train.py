@@ -91,7 +91,7 @@ container = batcher.getBatches()
 
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
-lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs)
+lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs, modelConfig.patience, modelConfig.decayRate)
 #lrReducer = FixedBasedLrReducer(modelConfig.trainingEpochs)
 clr = CyclicLearningRate(base_lr=0.00020, max_lr=0.0012, step_size=(204.*3), mode='exp_range', gamma=0.99996)
 msaver = ModelEvaluation()
