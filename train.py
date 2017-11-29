@@ -124,7 +124,7 @@ for epoch in xrange(1, number_of_epochs):
 
         sent, pred, aux, label = batcher.open(container[z])
         showProgress(i, numIterations, epoch)
-        nn.fit([sent, pred, aux], label, shuffle=False, verbose=0, callbacks=[clr])
+        nn.fit([sent, pred, aux], label, shuffle=False, verbose=0)
 
     showProgress(numIterations, numIterations, epoch)
     print '\n end of epoch in  {}... evaluating'.format((time.time() - start_time))
@@ -142,7 +142,7 @@ for epoch in xrange(1, number_of_epochs):
     print 'TOKEN F1-SCORE : {}'.format(tokenf1)
     print 'OFFICIAL F1-SCORE : {}'.format(officialf1)
 
-    #lrReducer.onEpochEnd(officialf1, epoch)
+    lrReducer.onEpochEnd(officialf1, epoch)
 
 
     print "%.2f sec for evaluation" % (time.time() - start_time)
