@@ -35,6 +35,7 @@ from corpus.corpus_converter import CorpusConverter
 from corpus.propbankbr_parser import PropBankParser
 from embeddings.emb_utils import prepareEmbeddings
 from utils.config_loader import readConfig
+from utils.data_clean import deleteTrainingResources
 
 seed = 27
 np.random.seed(seed)
@@ -43,6 +44,10 @@ np.random.seed(seed)
 print 'loading configuration'
 config, modelConfig = readConfig()
 print 'configuration loaded'
+
+print 'deleting old data'
+deleteTrainingResources()
+print 'data removed'
 
 
 print 'converting from propbank format : partition 0.95, 0.05. no development set'
