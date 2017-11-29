@@ -37,7 +37,7 @@ np.random.seed(4)
 
 from corpus.corpus_converter import CorpusConverter
 from embeddings.emb_utils import getEmbeddings
-from model.auxiliar.lr_reducer import PatienceBaseLrReducer, CyclicLearningRate
+from model.auxiliar.lr_reducer import PatienceBaseLrReducer, CyclicLearningRate, FixedBasedLrReducer
 from model.auxiliar.early_stopper import EarlyStopper
 from model.batcher import Batcher
 from model.configuration.model_config import ModelConfig
@@ -91,7 +91,8 @@ container = batcher.getBatches()
 
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
-lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs)
+#lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs)
+lrReducer = FixedBasedLrReducer(modelConfig.trainingEpochs)
 clr = CyclicLearningRate(base_lr=0.00020, max_lr=0.0012, step_size=(204.*3), mode='exp_range', gamma=0.99996)
 msaver = ModelEvaluation()
 print 'prepared'

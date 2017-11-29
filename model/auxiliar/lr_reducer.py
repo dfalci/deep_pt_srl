@@ -89,6 +89,27 @@ class RateBasedLrReducer(LrReducer):
 
         self.setLearningRate(new_lr)
 
+class FixedBasedLrReducer(LrReducer):
+
+    def __init__(self, trainingEpochs):
+        super(FixedBasedLrReducer, self).__init__(trainingEpochs)
+        self.changeEpochs = [28, 35, 42, 48]
+        self.lr = [0.0005, 0.0003, 0.0001, 0.00005]
+        self.current = -1
+
+    def onEpochEnd(self, f1, epoch):
+        if epoch in self.changeEpochs:
+            self.calculateNewLr()
+
+
+
+    def calculateNewLr(self):
+        self.current = self.current+1
+        new_lr = self.lr[self.current]
+        print 'changing lr to : {}'.format(new_lr)
+        self.setLearningRate(new_lr)
+        self.reductions +=1
+
 class PatienceBaseLrReducer(LrReducer):
 
     def __init__(self, trainingEpochs):
