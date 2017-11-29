@@ -93,7 +93,7 @@ class FixedBasedLrReducer(LrReducer):
 
     def __init__(self, trainingEpochs):
         super(FixedBasedLrReducer, self).__init__(trainingEpochs)
-        self.changeEpochs = [28, 35, 42, 48]
+        self.changeEpochs = [28, 35, 40, 47]
         self.lr = [0.0005, 0.0003, 0.0001, 0.00005]
         self.current = -1
 
