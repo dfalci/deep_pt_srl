@@ -46,14 +46,15 @@ config, modelConfig = readConfig()
 print 'configuration loaded'
 
 print 'deleting old data'
-deleteTrainingResources()
+deleteTrainingResources(20)
 print 'data removed'
 
 
 print 'converting from propbank format : partition 0.95, 0.05. no development set'
 parser = PropBankParser(config.corpusDir+'/PropBankBr_v1.1_Const.conll.txt', config.corpusDir+'/verbnet_gold.csv', seed=seed)
 parser.prepare()
-parser.generateFeatures(outputDirectory=config.convertedCorpusDir, partition=(0.95, 0, 0.05))
+#parser.generateFeatures(outputDirectory=config.convertedCorpusDir, partition=(0.95, 0, 0.05))
+parser.generateKFold(outputDirectory=config.foldsDir, k=20)
 print 'conversion ready'
 
 print 'preparing the embedding model - {} - {}'.format(modelConfig.embeddingType, modelConfig.embeddingSize)
@@ -62,8 +63,9 @@ print 'embedding prepared'
 
 
 print 'creating features'
-csvFiles = [config.convertedCorpusDir+'/propbank_training.csv', config.convertedCorpusDir+'/propbank_test.csv']
-converter = CorpusConverter(csvFiles, sentLoader, predLoader)
-converter.convertAndSave(config.resourceDir+'/feature_file')
-data = converter.load(config.resourceDir+'/feature_file.npy')
+for i in xrange(1, 21):
+    csvFiles = [config.foldsDir+'/train_fold_'+str(i)+'.csv', config.foldsDir+'/test_fold_'+str(i)+'.csv']
+    converter = CorpusConverter(csvFiles, sentLoader, predLoader)
+    converter.convertAndSave(config.resourceDir+'/feature_file_'+str(i))
+    data = converter.load(config.resourceDir+'/feature_file_'+str(i)+'.npy')
 print 'features created'

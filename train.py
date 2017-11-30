@@ -75,7 +75,15 @@ print 'loaded'
 print 'loading corpus'
 csvFiles = [config.convertedCorpusDir+'/propbank_training.csv', config.convertedCorpusDir+'/propbank_test.csv']
 converter = CorpusConverter(csvFiles, sentenceLoader, predicateLoader)
-data = converter.load(config.resourceDir+'/feature_file.npy')
+fold = 1
+foldComplement = '_1'
+try:
+    fold = str(sys.argv[1])
+    foldComplement = '_'+fold
+except:
+    pass
+
+data = converter.load(config.resourceDir+'/feature_file'+foldComplement+'.npy')
 tagMap = converter.tagMap
 tagList = converter.tagList
 nnUtils.setTagList(tagMap, tagList)
@@ -90,7 +98,7 @@ batcher.addAll(trainingData[0], trainingData[1], trainingData[2], trainingData[3
 container = batcher.getBatches()
 
 inference = SRLInference(tagMap, tagList)
-evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/finalResult.json')
+evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/fold_'+str(fold)+'/finalResult.json')
 lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs, modelConfig.patience, modelConfig.decayRate)
 #lrReducer = FixedBasedLrReducer(modelConfig.trainingEpochs)
 clr = CyclicLearningRate(base_lr=0.00020, max_lr=0.0012, step_size=(204.*3), mode='exp_range', gamma=0.99996)
@@ -103,6 +111,8 @@ nn = model.create(sentenceLoader.weights, predicateLoader.weights)
 nn.summary()
 lrReducer.setNetwork(nn)
 es = EarlyStopper()
+evaluator.prepare(nn, config.resultsDir+'/fold_'+str(fold)+'/epoch_'+str(1)+ '/', config.resourceDir+'/srl-eval.pl')
+exit(1)
 print 'model loaded'
 
 
@@ -133,7 +143,7 @@ for epoch in xrange(1, number_of_epochs):
 
     print '\n number of iterations : {}'.format(clr.clr_iterations)
 
-    evaluator.prepare(nn, config.resultsDir+'/epoch_'+str(epoch), config.resourceDir+'/srl-eval.pl')
+    evaluator.prepare(nn, config.resultsDir+'/fold_'+str(fold)+'/epoch_'+str(epoch), config.resourceDir+'/srl-eval.pl')
     evaluation = evaluator.evaluate()
 
     tokenf1 = evaluation["tokenMacroF1"]

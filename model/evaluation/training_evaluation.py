@@ -61,9 +61,10 @@ class Evaluator(object):
 
     def __createDirectoryIfNeeded(self, directory):
         try:
-            os.stat(directory)
+            os.makedirs(os.path.dirname(directory))
         except:
-            os.mkdir(directory)
+            pass
+            #os.makedirs(os.path.dirname(directory))
 
     def prepare(self, nn, targetDirectory, conllFile):
         self.nn = nn
@@ -102,3 +103,4 @@ class Evaluator(object):
         with open(self.generalResultFile, 'w') as f:
             f.write(json.dumps(self.evaluations))
             f.close()
+

@@ -378,15 +378,60 @@ class PropBankParser(object):
 
         return final
 
+    def __getChunks(self, l, n):
+        subLists = []
+        for i in xrange(0, len(l), n):
+             subLists.append(l[i:i + n])
+        return subLists
+
+
+    def generateKFold(self, outputDirectory=None, k=20):
+        random.seed(self.seed)
+        props = self.__fromCorpusToPropositions(self.__readCorpus())
+        random.shuffle(props)
+        final = []
+        for p in props:
+            final.append(self.__toNetworkFormat(p))
+        folds = self.__getChunks(final, len(final)/k)
+
+        finalFolds = []
+        for currentFold in xrange(0, len(folds)):
+            trainingSet = []
+            testSet = []
+            for i in xrange(0, len(folds)):
+                if i == currentFold:
+                    testSet = folds[i]
+                else:
+                    trainingSet.extend(folds[i])
+            finalFolds.append((trainingSet, testSet))
+        i=1
+        for currentFold in finalFolds:
+            self.__export(currentFold[0], join(outputDirectory, 'train_fold_'+str(i)+'.csv'))
+            self.__export(currentFold[1], join(outputDirectory, 'test_fold_'+str(i)+'.csv'))
+            i+=1
+
+
+        """
+        if partition != (0, 0, 0):
+            trainingSet, devSet, testSet = self.__generatePartitions(final, partition)
+            if len(trainingSet) > 0:
+                self.__export(trainingSet, join(outputDirectory, 'propbank_training.csv'))
+            if len(testSet) > 0:
+                self.__export(testSet, join(outputDirectory, 'propbank_test.csv'))
+            if len(devSet) > 0:
+                self.__export(devSet, join(outputDirectory, 'propbank_dev.csv'))
+        """
+
 
 
 
 if __name__ == '__main__':
-    parser = PropBankParser('../../resources/corpus/PropBankBr_v1.1_Const.conll.txt', '../../resources/corpus/verbnet_gold.csv')
+    parser = PropBankParser('../resources/corpus/PropBankBr_v1.1_Const.conll.txt', '../resources/corpus/verbnet_gold.csv')
     parser.prepare()
     parser.head()
-    parser.generateFeatures(outputDirectory='../../resources/corpus/converted', partition=(0.9, 0, 0.10))
-    parser.printStats()
+    parser.generateKFold('../resources/corpus/folds', 20)
+    #parser.generateFeatures(outputDirectory='../../resources/corpus/converted', partition=(0.9, 0, 0.10))
+    #parser.printStats()
 
 
 
