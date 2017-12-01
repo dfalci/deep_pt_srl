@@ -37,7 +37,7 @@ np.random.seed(4)
 
 from corpus.corpus_converter import CorpusConverter
 from embeddings.emb_utils import getEmbeddings
-from model.auxiliar.lr_reducer import PatienceBaseLrReducer, CyclicLearningRate, FixedBasedLrReducer
+from model.auxiliar.lr_reducer import captureOptimizerLR
 from model.auxiliar.early_stopper import EarlyStopper
 from model.batcher import Batcher
 from model.configuration.model_config import ModelConfig
@@ -99,20 +99,19 @@ container = batcher.getBatches()
 
 inference = SRLInference(tagMap, tagList)
 evaluator = Evaluator(testData, inference, nnUtils, config.resultsDir+'/fold_'+str(fold)+'/finalResult.json')
-lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs, modelConfig.patience, modelConfig.decayRate)
+#lrReducer = PatienceBaseLrReducer(modelConfig.trainingEpochs, modelConfig.patience, modelConfig.decayRate)
 #lrReducer = FixedBasedLrReducer(modelConfig.trainingEpochs)
-clr = CyclicLearningRate(base_lr=0.00020, max_lr=0.0012, step_size=(204.*3), mode='exp_range', gamma=0.99996)
-msaver = ModelEvaluation()
+#clr = CyclicLearningRate(base_lr=0.00020, max_lr=0.0012, step_size=(204.*3), mode='exp_range', gamma=0.99996)
+msaver = ModelEvaluation(fold)
 print 'prepared'
 
 print 'creating neural network model'
 model = LSTMModel(ModelConfig.Instance())
 nn = model.create(sentenceLoader.weights, predicateLoader.weights)
 nn.summary()
-lrReducer.setNetwork(nn)
+#lrReducer.setNetwork(nn)
 es = EarlyStopper()
 evaluator.prepare(nn, config.resultsDir+'/fold_'+str(fold)+'/epoch_'+str(1)+ '/', config.resourceDir+'/srl-eval.pl')
-exit(1)
 print 'model loaded'
 
 
@@ -141,7 +140,7 @@ for epoch in xrange(1, number_of_epochs):
     print '\n end of epoch in  {}... evaluating'.format((time.time() - start_time))
     start_time = time.time()
 
-    print '\n number of iterations : {}'.format(clr.clr_iterations)
+ #   print '\n number of iterations : {}'.format(clr.clr_iterations)
 
     evaluator.prepare(nn, config.resultsDir+'/fold_'+str(fold)+'/epoch_'+str(epoch), config.resourceDir+'/srl-eval.pl')
     evaluation = evaluator.evaluate()
@@ -153,7 +152,8 @@ for epoch in xrange(1, number_of_epochs):
     print 'TOKEN F1-SCORE : {}'.format(tokenf1)
     print 'OFFICIAL F1-SCORE : {}'.format(officialf1)
 
-    lrReducer.onEpochEnd(officialf1, epoch)
+  #  lrReducer.onEpochEnd(officialf1, epoch)
+    print 'LR : {}'.format(captureOptimizerLR(nn))
 
 
     print "%.2f sec for evaluation" % (time.time() - start_time)

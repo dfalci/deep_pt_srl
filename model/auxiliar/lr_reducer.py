@@ -118,7 +118,7 @@ class PatienceBaseLrReducer(LrReducer):
         self.roundsAwaiting = 0
         self.reduceRate = reduceRate
         self.patience = patience
-        self.maxReductions = 15
+        self.maxReductions = 30
         self.reductions = 0
         print '{} - {}'.format(self.reduceRate, self.patience)
 
@@ -137,6 +137,7 @@ class PatienceBaseLrReducer(LrReducer):
     def calculateNewLr(self):
         lr = self.getLearningRate()
         new_lr = lr * self.reduceRate
+        print 'NEW LEARNING RATE : {}'.format(lr)
         self.setLearningRate(new_lr)
         self.reductions +=1
 
@@ -209,6 +210,10 @@ class CyclicLearningRate(Callback):
 
         for k, v in logs.items():
             self.history.setdefault(k, []).append(v)
+
+
+def captureOptimizerLR(nn):
+    return K.get_value(nn.optimizer.lr)
 
 
 if __name__ == '__main__':

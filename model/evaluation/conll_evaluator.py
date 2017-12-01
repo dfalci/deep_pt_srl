@@ -30,6 +30,7 @@
 
 import subprocess
 import re
+from utils.data_utils import createDirectories
 
 class CoNLLEvaluator(object):
     """
@@ -59,6 +60,7 @@ class CoNLLEvaluator(object):
 
 
     def __write(self, list, file):
+        createDirectories(file)
         file = open(file, "w")
         for sentIdx in xrange(0, len(list)):
             sentence = list[sentIdx]

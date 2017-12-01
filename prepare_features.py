@@ -64,6 +64,7 @@ print 'embedding prepared'
 
 print 'creating features'
 for i in xrange(1, 21):
+    print 'creating feature file {}'.format(i)
     csvFiles = [config.foldsDir+'/train_fold_'+str(i)+'.csv', config.foldsDir+'/test_fold_'+str(i)+'.csv']
     converter = CorpusConverter(csvFiles, sentLoader, predLoader)
     converter.convertAndSave(config.resourceDir+'/feature_file_'+str(i))

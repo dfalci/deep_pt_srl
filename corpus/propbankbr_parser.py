@@ -35,6 +35,7 @@ import random
 from os.path import join
 
 import unicodecsv as csv
+from utils.data_utils import createDirectories
 
 from utils import ContractionHandler
 
@@ -332,6 +333,7 @@ class PropBankParser(object):
 
 
     def __export(self, propositions, filename):
+        createDirectories(filename)
         with open(filename, 'w') as f:
             writer = csv.writer(f, encoding='utf-8')
             writer.writerow(['propositionId', 'predicate', 'sentence', 'roles', 'allCapitalized', 'firstCapitalized', 'noCapitalized', 'distance', 'predicateContext'])

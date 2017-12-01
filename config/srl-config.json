@@ -12,10 +12,10 @@
   "optimizer":"adam",
   "lossFunction":"categorical_crossentropy",
   "learningRate":0.001,
-  "patience":5,
-  "decayRate":0.7,
-  "maxReductions":15,
+  "patience":4,
+  "decayRate":0.70,
+  "maxReductions":40,
   "checkpointsToKeep":10,
   "useEA":true,
-  "eaPatience":5
+  "eaPatience":15
 }

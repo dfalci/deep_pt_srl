@@ -58,7 +58,6 @@ class CorpusConverter(object):
         self.tagMap = {}
         self.tagList = []
 
-
     def __loadFile(self, f):
         return pd.read_csv(f)
 
@@ -98,9 +97,8 @@ class CorpusConverter(object):
         self.wordStat['total']+=val
         return retorno
 
-    def __prepareRoles(self, roles):
+    def __fillRoles(self, roles):
         tags = roles.split(' ')
-        retorno = []
         for t in tags:
             try:
                 self.tagCount[t] = self.tagCount[t]+1
@@ -108,8 +106,22 @@ class CorpusConverter(object):
                 self.tagCount[t] = 1
                 self.tagList.append(t)
                 self.tagMap[t] = len(self.tagList)-1
+
+    def __prepareRoles(self, roles):
+        tags = roles.split(' ')
+        retorno = []
+        for t in tags:
             retorno.append(self.tagMap[t])
         return retorno
+
+    def __prepareFullRoles(self):
+        parts = []
+        for f in self.csvFiles:
+            parts.append(self.__loadFile(f))
+
+        originalData = pd.concat(parts)
+
+        np.array(originalData['roles'].apply(lambda x: self.__fillRoles(x)))
 
     def __getIntegerFeatures(self, x):
         x = x.strip().split(' ')
@@ -207,6 +219,7 @@ class CorpusConverter(object):
         return data[()]["data"]
 
     def convert(self):
+        self.__prepareFullRoles()
         structure = []
         for f in self.csvFiles:
             originalData = self.__loadFile(f)
@@ -227,7 +240,8 @@ class CorpusConverter(object):
         return structure
 
     def convertAndSave(self, featureFile):
-        self.save(self.convert(), featureFile)
+        temp = self.convert()
+        self.save(temp, featureFile)
 
 
 

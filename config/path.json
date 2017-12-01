@@ -3,6 +3,7 @@
   "resourceDir":"${baseDir}/resources",
   "corpusDir":"${baseDir}/resources/corpus",
   "convertedCorpusDir":"${baseDir}/resources/corpus/converted",
+  "foldsDir":"${baseDir}/resources/corpus/folds",
   "embeddingsDir":"${baseDir}/resources/embeddings",
   "resultsDir":"${baseDir}/results"
 }

@@ -4,6 +4,13 @@ import os
 import urllib2
 import urlparse
 
+
+def createDirectories(file_path):
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
 def getFile(filename, origin):
     """
     Download the file with a given filename from an origin

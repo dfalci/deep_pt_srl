@@ -75,12 +75,12 @@ class ModelPersistence(object):
 
 class ModelEvaluation(object):
 
-    def __init__(self):
+    def __init__(self, fold):
         self.bestEpoch = None
         self.maxF1 = 0
         self.persistence = ModelPersistence()
-        self.patternRegular = Config.Instance().resultsDir+'/model_'
-        self.patternEpoch = Config.Instance().resultsDir+'/regular_'
+        self.patternRegular = Config.Instance().resultsDir+'/fold_'+str(fold)+'/model_'
+        self.patternEpoch = Config.Instance().resultsDir+'/fold_'+str(fold)+'/regular_'
         self.keepBestEpoch = 5
         self.keepFixedPoint = 3
         self.savedByBestEpoch = []

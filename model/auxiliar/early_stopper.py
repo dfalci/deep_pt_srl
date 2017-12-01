@@ -51,10 +51,13 @@ class EarlyStopper(object):
         if newValue >= self.best:
             self.best = newValue
             self.counter = 0
+            return False
         else:
             if self.counter >= self.patience:
                 return True
-            self.counter +=1
-        return False
+            else:
+                self.counter +=1
+                print 'current round in early stopper {}'.format(self.counter)
+                return False
 
 
