@@ -17,5 +17,5 @@
   "maxReductions":40,
   "checkpointsToKeep":10,
   "useEA":true,
-  "eaPatience":15
+  "eaPatience":10
 }
